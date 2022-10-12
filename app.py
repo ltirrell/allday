@@ -177,15 +177,15 @@ with tab5:
     pack_metric_title = "Price" if pack_metric == "Price" else "Sales Count"
     c1.metric(
         f"Overall Average {pack_metric_title}, Common",
-        avg_pack_metrics[pack_metric]["COMMON"],
+        f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["COMMON"]:.2f}',
     )
     c1.metric(
         f"Overall Average {pack_metric_title}, Rare",
-        avg_pack_metrics[pack_metric]["RARE"],
+        f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["RARE"]:.2f}',
     )
     c1.metric(
         f"Overall Average {pack_metric_title}, Legendary",
-        avg_pack_metrics[pack_metric]["LEGENDARY"],
+        f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["LEGENDARY"]:.2f}',
     )
     chart = (
         (
@@ -196,6 +196,7 @@ with tab5:
                 y=alt.Y(
                     pack_metric,
                     title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
+                    scale=alt.Scale(type='log'),
                     stack=None,
                 ),
                 tooltip=[
@@ -241,7 +242,11 @@ with tab5:
     )
     cols = st.columns(5)
     pack_choice = cols[0].radio(
-        "Which pack type?", ["Standard", "Premium"], horizontal=True, key="pack_choice"
+        "Which pack type?",
+        ["Standard", "Premium"],
+        format_func=lambda x: f"{x} (cost: ${59 if x=='Standard' else 219})",
+        horizontal=True,
+        key="pack_choice",
     )
     pack_button = cols[0].button("Mint Pack!", key="mint_pack")
 
@@ -253,9 +258,9 @@ with tab5:
         n_rare = players[players["Moment_Tier"] == "RARE"].Player.count()
         n_legendary = players[players["Moment_Tier"] == "LEGENDARY"].Player.count()
         total_val_average = (
-            avg_pack_metrics["COMMON"] * n_common
-            + avg_pack_metrics["RARE"] * n_rare
-            + avg_pack_metrics["LEGENDARY"] * n_legendary
+            avg_pack_metrics["Price"]["COMMON"] * n_common
+            + avg_pack_metrics["Price"]["RARE"] * n_rare
+            + avg_pack_metrics["Price"]["LEGENDARY"] * n_legendary
         )
         if n_legendary > 0:
             pack_type = "Legendary"
