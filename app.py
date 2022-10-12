@@ -173,18 +173,31 @@ with tab5:
     c1, c2 = st.columns([1, 3])
     series2_mint1_grouped = load_series2_mint1_grouped()
     avg_pack_metrics = get_avg_pack_metrics(series2_mint1_grouped)
-    pack_metric=c1.radio("Choose a metric", ["Price", "Count"], key='pack_metric')
-    pack_metric_title = "Price" if pack_metric=="Price" else "Sales Count"
-    c1.metric(f"Overall Average {pack_metric_title}, Common", avg_pack_metrics[pack_metric]["COMMON"])
-    c1.metric(f"Overall Average {pack_metric_title}, Rare", avg_pack_metrics[pack_metric]["RARE"])
-    c1.metric(f"Overall Average {pack_metric_title}, Legendary", avg_pack_metrics[pack_metric]["LEGENDARY"])
+    pack_metric = c1.radio("Choose a metric", ["Price", "Count"], key="pack_metric")
+    pack_metric_title = "Price" if pack_metric == "Price" else "Sales Count"
+    c1.metric(
+        f"Overall Average {pack_metric_title}, Common",
+        avg_pack_metrics[pack_metric]["COMMON"],
+    )
+    c1.metric(
+        f"Overall Average {pack_metric_title}, Rare",
+        avg_pack_metrics[pack_metric]["RARE"],
+    )
+    c1.metric(
+        f"Overall Average {pack_metric_title}, Legendary",
+        avg_pack_metrics[pack_metric]["LEGENDARY"],
+    )
     chart = (
         (
             alt.Chart(series2_mint1_grouped)
             .mark_bar()
             .encode(
                 x=alt.X("Player", sort="-y", title=None),
-                y=alt.Y(pack_metric, title="Mean Price ($)" if pack_metric==Price else "Sales Count", stack=None),
+                y=alt.Y(
+                    pack_metric,
+                    title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
+                    stack=None,
+                ),
                 tooltip=[
                     alt.Tooltip("Player"),
                     alt.Tooltip("Position"),
@@ -233,7 +246,6 @@ with tab5:
     pack_button = cols[0].button("Mint Pack!", key="mint_pack")
 
     sample_df = load_pack_samples()
-    
 
     if pack_button:
         players = mint_pack(sample_df, pack_choice)

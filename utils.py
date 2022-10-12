@@ -514,9 +514,9 @@ def load_headshot(headshot_url):
         hsize = int((float(image.size[1]) * float(wpercent)))
         image = image.resize((basewidth, hsize), Image.Resampling.LANCZOS)
     except:
-        image = Image.new("RGB", (basewidth,142))
+        image = Image.new("RGB", (basewidth, 142))
         img = ImageDraw.Draw(image)
-        img.rectangle([(0, 0), (200, 200 )], fill='#6c706d')
+        img.rectangle([(0, 0), (200, 200)], fill="#6c706d")
     return image
 
 
@@ -1265,6 +1265,7 @@ def load_player_pack():
     )
     return df
 
+
 @st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
 def load_pack_cache(date_range):
     if type(date_range) == str:
@@ -1279,7 +1280,7 @@ def get_pack_value(player_pack_data, proporiton_dict, pack_type, i):
     common = player_pack_data[player_pack_data.Moment_Tier == "COMMON"]
     rare = player_pack_data[player_pack_data.Moment_Tier == "RARE"]
     legendary = player_pack_data[player_pack_data.Moment_Tier == "LEGENDARY"]
-    
+
     tier = np.random.choice(
         list(proporiton_dict.keys()), p=list(proporiton_dict.values())
     )
@@ -1316,20 +1317,23 @@ def mint_pack(sample_df, pack_type):
     players = sample_df[(sample_df.idx == randn) & (sample_df.pack_type == pack_type)]
     return players
 
+
 @st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
 def load_series2_mint1_grouped():
     return pd.read_csv("data/cache/series2_mint1_grouped.csv")
+
 
 @st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
 def load_pack_samples():
     return pd.read_csv("data/cache/sample_packs.csv.gz")
 
+
 def get_avg_pack_metrics(data):
-    vals = {"Price":{}, "Count":{}}
-    for tier in ['COMMON', "RARE", "LEGENDARY"]:
-        df = data[data['Moment_Tier'] == tier]
-        total_spent = (df.Price*df.Count).sum()
+    vals = {"Price": {}, "Count": {}}
+    for tier in ["COMMON", "RARE", "LEGENDARY"]:
+        df = data[data["Moment_Tier"] == tier]
+        total_spent = (df.Price * df.Count).sum()
         total_sold = df.Count.sum()
-        vals["Price"][tier] = total_spent/total_sold
+        vals["Price"][tier] = total_spent / total_sold
         vals["Count"][tier] = df.Count.mean()
     return vals
