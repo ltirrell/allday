@@ -111,6 +111,23 @@ with tab5:
         )
 
     st.subheader("Pack Sales")
+    st.caption('"She needs premium dude! Premium!" ~The Simpsons')
+    st.write(
+        f"""
+        Let's compare sales of the different pack types, `Standard` vs `Premium`.
+        Generally, Premium packs are much more expensive (~\$200+ vs ~\$60, though there are some exceptions), provide more Moments, and have more chance of getting higher Rarity Tiers for its Moments.
+        There are also fewer Premium Packs per drop.
+        
+        You can view pack sales by certain Date Ranges, or by a Selected Drop period.
+
+        On the left, you'll see the Sales per minute and Total Sales, broken down by Pack Type.
+        The left Chart shows the Sales per Minute plotted over the time period, while the right chart is a stacked histogram of Sales per minute (so the bar represents the number of minutes within various Sales per minute bins).
+
+        To view information for specific Pack Drops, a Pack Drop periods which has both a Standard and Premium pack can be chosen from the dropdown box. An additional comparison is shown for the Total Sales time- the time it takes between the first and last pack of a given drop to be sold. In most cases, Premium Packs sell out much quicker (though also have a lower number being sold).
+        
+        Note that this is only a subset of all Pack Drops; quite a few are reward drops with no sales information. Also, information regarding dates and specific details of drops before the 2022 season is sparse, and may be updated at a later date.
+        """
+    )
     c1, c2 = st.columns(2)
     date_range_choice = c1.radio(
         "Choose how to view data",
