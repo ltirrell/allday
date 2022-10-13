@@ -547,14 +547,59 @@ with tab5:
     c2.altair_chart(chart)
 
     st.subheader("Try your luck at minting a pack!")
-    st.write(
-        """
+    simulation = load_simulation()
+    info = simulation.groupby('Pack Type').agg(mean=('Price', 'mean'), median=('Price', 'median')).reset_index()
+    
+    c1, c2 = st.columns(2)
+    c1.write(
+        f"""
         We used actual sales data to see the value of Moments available in the Series 2, Week 1-2 Packs.
         Choose your pack type, and click the button to simulate a mint!
 
         Note: the process used here does not capture the rarity of certain moments (such as some Rare Moments having lower total numbers than other Rare Moments), however it does capture the frequency at which each Moment is traded. More liquid Moments (with higher numbers of sales) will be more likely to appear. Pack mints were precomputed (10,000 times for Standard packs and 5,000 times for Premium packs) due to computational resources.
+
+        We ran a simulation 1000 times, and found the following:
+        - For Standard packs, the mean value is \${info[info['Pack Type']=='Standard']['mean'].values[0]:.2f} (median value is \${info[info['Pack Type']=='Standard']['median'].values[0]:.2f}). {info[info['Pack Type']=='Standard']['mean'].values[0]:.2f}). {simulation[simulation['Pack Type']=='Standard'][simulation.Price > 59].Price.count() / len(simulation[simulation['Pack Type']=='Standard']):.2%} of the time, the value is more than the $59 price.
+        - For Premium packs, the mean value is \${info[info['Pack Type']=='Premium']['mean'].values[0]:.2f} (median value is \${info[info['Pack Type']=='Premium']['median'].values[0]:.2f}). {simulation[simulation['Pack Type']=='Premium'][simulation.Price > 219].Price.count() / len(simulation[simulation['Pack Type']=='Premium']):.2%} of the time, the value is more than the $219 price.
         """
     )
+    
+
+    chart = (
+        alt.Chart(simulation)
+        .mark_boxplot()
+        .encode(
+            x="Pack Type",
+            y=alt.Y("Price", title="Pack Value", scale=alt.Scale(type="log")),
+            tooltip=[alt.Tooltip("Price", title="Pack Value")],
+        )
+        .properties(height=500, width=300)
+    )
+    rules = (
+        alt.Chart(
+            pd.DataFrame(
+                {
+                    "Pack Type": [
+                        "Standard",
+                        "Premium",
+                    ],
+                    "Pack Value": [59, 219],
+                    "Color": ["#a0a0ad", "#c29c55"],
+                }
+            )
+        )
+        .mark_rule(strokeDash=[10, 4], opacity=0.7)
+        .encode(
+            # x="Pack Type",
+            y="Pack Value",
+            color=alt.Color("Color:N", scale=None),
+            strokeWidth=alt.value(1),
+        )
+    )
+    c2.altair_chart(chart + rules)
+
+
+    st.write('---')
     cols = st.columns(5)
     pack_choice = cols[0].radio(
         "Which pack type?",

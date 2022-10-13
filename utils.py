@@ -63,6 +63,7 @@ __all__ = [
     "load_pack_samples",
     "get_avg_pack_metrics",
     "load_player_mint",
+    "load_simulation"
 ]
 
 cols_to_keep = [
@@ -1350,3 +1351,6 @@ def load_player_mint(date):
         df[x] = pd.to_datetime(df[x]).dt.tz_convert("US/Eastern")
 
     return df
+@st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
+def load_simulation():
+    return pd.read_csv("data/simulation.csv")
