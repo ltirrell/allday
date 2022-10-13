@@ -191,7 +191,7 @@ with tab5:
 
         Generally, Sales Counts are much higher for Moments in the Pack, though there is no clear difference in Price.
         """
-    )    
+    )
     c1, c2 = st.columns(2)
     date_range = c1.selectbox(
         "Date range:",
@@ -552,7 +552,7 @@ with tab5:
         We used actual sales data to see the value of Moments available in the Series 2, Week 1-2 Packs.
         Choose your pack type, and click the button to simulate a mint!
 
-        Note: the process used here does not capture the rarity of certain moments (such as some Rare Moments having lower total numbers than other Rare Moments), however it does capture the frequency at which each Moment is traded. More liquid Moments (with higher numbers of sales) will be more likely to appear.
+        Note: the process used here does not capture the rarity of certain moments (such as some Rare Moments having lower total numbers than other Rare Moments), however it does capture the frequency at which each Moment is traded. More liquid Moments (with higher numbers of sales) will be more likely to appear. Pack mints were precomputed (10,000 times for Standard packs and 5,000 times for Premium packs) due to computational resources.
         """
     )
     cols = st.columns(5)
