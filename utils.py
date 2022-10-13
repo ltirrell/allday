@@ -62,6 +62,7 @@ __all__ = [
     "load_series2_mint1_grouped",
     "load_pack_samples",
     "get_avg_pack_metrics",
+    "load_player_mint",
 ]
 
 cols_to_keep = [
@@ -349,7 +350,7 @@ game_timings = {
 
 pack_date_ranges = [
     ("2021-12-10 06:00", "2021-12-13 23:59"),
-    ("2021-12-17 02:00", "2021-12-21 08:00"),
+    ("2021-12-17 06:00", "2021-12-21 08:00"),
     ("2022-01-07 06:00", "2022-01-07 23:59"),
     ("2022-01-14 06:00", "2022-01-14 23:59"),
     ("2022-02-16 06:00", "2022-02-18 23:59"),
@@ -1243,7 +1244,6 @@ def alt_pack_sales(df):
 
 @st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
 def load_player_pack():
-    # #TODO: cache
     df = pd.read_csv(
         "data/current_allday_data_pack.csv.gz", usecols=player_pack_cols
     ).dropna(
@@ -1337,3 +1337,16 @@ def get_avg_pack_metrics(data):
         vals["Price"][tier] = total_spent / total_sold
         vals["Count"][tier] = df.Count.mean()
     return vals
+
+@st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
+def load_player_mint(date):
+    df = pd.read_csv(
+        f"data/cache/player_mint-{date}--grouped.csv.gz",
+    )
+    for x in [
+        "Datetime",
+        "Date",
+    ]:
+        df[x] = pd.to_datetime(df[x]).dt.tz_convert("US/Eastern")
+
+    return df

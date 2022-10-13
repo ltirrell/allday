@@ -138,3 +138,4 @@ data/packs
 data/pbp.csv.gz
 data/pack_combined.csv.gz
 data/pack_reveals.csv.gz
+data/current_allday_data*.csv.gz

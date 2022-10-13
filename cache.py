@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import datetime
 import json
 
 import numpy as np
@@ -343,8 +344,6 @@ if __name__ == "__main__":
                 "Player",
                 "Team",
                 "Position",
-                "Season",
-                "Week",
                 "Moment_Tier",
                 "Moment_Date",
                 "Total_Circulation",
@@ -391,3 +390,64 @@ if __name__ == "__main__":
         index=False,
         compression="gzip",
     )
+
+    for i, x in enumerate(pack_date_ranges):
+        start = pd.to_datetime(x[0]).tz_localize("US/Eastern")
+        end = pd.to_datetime(x[1]).tz_localize("US/Eastern")
+        try:
+            next_start = pd.to_datetime(pack_date_ranges[i + 1][0]).tz_localize(
+                "US/Eastern"
+            )
+            next_end = pd.to_datetime(pack_date_ranges[i + 1][1]).tz_localize(
+                "US/Eastern"
+            )
+        except IndexError:
+            next_start = pd.to_datetime(datetime.datetime.now()).tz_localize(
+                "US/Eastern"
+            )
+            next_end = pd.to_datetime(datetime.datetime.now()).tz_localize("US/Eastern")
+        df = player_pack_data[
+            (player_pack_data.Datetime >= start)
+            & (player_pack_data.Datetime < end + pd.Timedelta("1d"))
+        ]
+        df = df[
+            [
+                "Datetime",
+                "Date",
+                "Price",
+                "Player",
+                "Team",
+                "Position",
+                "Play_Type",
+                "Moment_Date",
+                "Moment_Tier",
+                "Series",
+                "Set_Name",
+                "marketplace_id",
+                "site",
+                "Datetime_Reveal",
+                "Moments_In_Pack",
+                "Datetime_Pack",
+                "Pack_Price",
+                "Pack_Buyer",
+                "Pack Type",
+                "Mint_Date",
+            ]
+        ]
+        minted = df[(df.Mint_Date.dt.date >= start.date()) & (df.Mint_Date.dt.date < next_start.date())]
+        df["minted_moment"] = False
+        df["minted_player"] = False
+        df['player_not_moment'] = False
+        df['player_moment'] = False
+        df.loc[df.Player.isin(minted.Player.unique()), "minted_player"] = True
+        df.loc[df.marketplace_id.isin(minted.marketplace_id.unique()), "minted_moment"] = True
+        df.loc[(df.minted_player) & ~(df.minted_moment), "player_not_moment"] = True
+        df.loc[(df.minted_player) & (df.minted_moment), "player_moment"] = True
+        print(f"#@# {x}: {len(df)}")
+
+        date_str = start.date()
+        df.to_csv(
+            f"data/cache/player_mint-{date_str}--grouped.csv.gz",
+            index=False,
+            compression="gzip",
+        )
