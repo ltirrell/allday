@@ -184,7 +184,14 @@ with tab5:
     chart = alt_pack_sales(df)
     c2.altair_chart(chart, use_container_width=True)
 
-    st.header("Packs and Marketplace")
+    st.header("Chase the Drop?")
+    st.write(
+        f"""
+        For the subset of Pack Drops with Premium and Standard packs, we'll compare the Price and Sales Count of Moments for Players that are in the Pack Drop. Time periods are shown from a few hours before the drop to about a day after the drop. The markeplace is closed during the time of the drop, so no sales will occur at this time
+
+        Generally, Sales Counts are much higher for Moments in the Pack, though there is no clear difference in Price.
+        """
+    )    
     c1, c2 = st.columns(2)
     date_range = c1.selectbox(
         "Date range:",
@@ -452,7 +459,7 @@ with tab5:
 
         c1, c2 = st.columns(2)
         c1.write(
-            f"For Players with Moments of the same Tier both in the Pack Drop and not in the pack drop, is there a difference in {pack_metric_title}?"
+            f"For Players with Moments of the same Rarity Tier both in the Pack Drop and not in the pack drop, is there a difference in {pack_metric_title}?"
         )
         if ttest.pvalue < 0.05:
             ans = "Yes!"
@@ -470,6 +477,14 @@ with tab5:
     # #---
 
     st.header("Pack Drop: Week 1 and 2 of the 2022 Season")
+    st.write(
+        f"""
+        We'll go more in depth for the first Pack Drop of the 2022 Season, covering Weeks 1 and 2. This occured on 2022-09-27 if you would like to investigate it in the previous sections.
+
+        Choose a metric (Price or Count of Sales) to compare for each of the moments within this release, as well as the average based on Moment Rarity Tier.
+
+        """
+    )
     c1, c2 = st.columns([1, 3])
     series2_mint1_grouped = load_series2_mint1_grouped()
     avg_pack_metrics = get_avg_pack_metrics(series2_mint1_grouped)
@@ -505,7 +520,7 @@ with tab5:
                     alt.Tooltip("Team"),
                     alt.Tooltip("Moment_Tier", title="Moment Tier"),
                     alt.Tooltip("marketplace_id", title="Flow ID"),
-                    alt.Tooltip("Pack Type"),
+                    # alt.Tooltip("Pack Type"),
                     alt.Tooltip("Total_Circulation", title="Total Circulation"),
                     alt.Tooltip("Price", title="Mean Price ($)", format=",.2f"),
                     alt.Tooltip("Max_Price", title="Max Price ($)", format=",.2f"),
@@ -522,15 +537,14 @@ with tab5:
                     # ),
                 ),
                 # opacity=alt.Opacity("Pack Type", scale=alt.Scale(domain=["Standard", "Premium"], range=[.8 ,.6])),
-                row=alt.Row("Pack Type", title=None),
+                # row=alt.Row("Pack Type", title=None),
                 href="site",
             )
         )
         .interactive()
-        .properties(height=300, width=800)
+        .properties(height=700, width=800)
     )
     c2.altair_chart(chart)
-    c1.write(series2_mint1_grouped)
 
     st.subheader("Try your luck at minting a pack!")
     st.write(

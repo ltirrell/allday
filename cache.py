@@ -348,7 +348,7 @@ if __name__ == "__main__":
                 "Moment_Date",
                 "Total_Circulation",
                 "site",
-                "Pack Type",
+                # "Pack Type",  # not doing for now
             ]
         )
         .agg(
