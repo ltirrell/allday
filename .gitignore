@@ -133,5 +133,9 @@ dmypy.json
 .streamlit
 
 data/20??-*/*
+data/packs
 # too big...
 data/pbp.csv.gz
+data/pack_combined.csv.gz
+data/pack_reveals.csv.gz
+data/current_allday_data*.csv.gz
