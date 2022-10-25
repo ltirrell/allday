@@ -70,8 +70,9 @@ Data was queried using the [Flipside ShroomDK](https://sdk.flipsidecrypto.xyz/sh
 """
     )
 
-tab5, tab4, tab3, tab2, tab1 = st.tabs(
+tab6, tab5, tab4, tab3, tab2, tab1 = st.tabs(
     [
+        "Predictions",
         "Packs",
         "Challenges",
         "What Drives Price?",
@@ -79,6 +80,12 @@ tab5, tab4, tab3, tab2, tab1 = st.tabs(
         "Players or Play Types?",
     ]
 )
+
+with tab6:
+    st.header("Predictions")
+
+
+    
 
 with tab5:
     st.header("Packs")
@@ -93,426 +100,180 @@ with tab5:
     Special thanks to Twitter user [@DiamondNFLAD](https://twitter.com/DiamondNFLAD) for consolidating this information!
     """
     )
-    st.subheader("Pack Info")
-    with st.expander("Pack Info"):
-        pack_info = load_pack_info()
+    if st.checkbox("Load Section?", key="load_tab5"):
+        st.subheader("Pack Info")
+        with st.expander("Pack Info"):
+            pack_info = load_pack_info()
+            st.write(
+                """
+                - Packs are ordered by Number, so most recent releases are higher numbers.
+                - Packs are either `PREMIUM` or `STANDARD`, which is related to the number of Moments in a Pack, the Rarity of these Moments, and how much the Pack costs to purchase. There are also special `PLAYOFFS` packs, which are grouped in with `STANDARD` for analyses. 
+                - Series 1 were released prior to the 2022 NFL season, while Series 2 came out during this current season.
+                - Cost is how much Packs cost to mint (in USD). Non-zero costs were sold during Pack Drops, while those with a Cost of 0 were sent to NFL All Day Users as rewards (such as for gaining a certain amount of Playbook Yards).
+                - Supply is the number of Packs minted.  
+                """
+            )
+            pack_info
+            st.write(
+                "Note: Number 29 was a test and never released, so not included in the table"
+            )
+
+        st.subheader("Pack Sales")
+        st.caption('"She needs premium dude! Premium!" ~The Simpsons')
         st.write(
+            f"""
+            Let's compare sales of the different pack types, `Standard` vs `Premium`.
+            Generally, Premium packs are much more expensive (~\$200+ vs ~\$60, though there are some exceptions), provide more Moments, and have more chance of getting higher Rarity Tiers for its Moments.
+            There are also fewer Premium Packs per drop.
+            
+            You can view pack sales by certain Date Ranges, or by a Selected Drop period.
+
+            On the left, you'll see the Sales per minute and Total Sales, broken down by Pack Type.
+            The left Chart shows the Sales per Minute plotted over the time period, while the right chart is a stacked histogram of Sales per minute (so the bar represents the number of minutes within various Sales per minute bins).
+
+            To view information for specific Pack Drops, a Pack Drop periods which has both a Standard and Premium pack can be chosen from the dropdown box. An additional comparison is shown for the Total Sales time- the time it takes between the first and last pack of a given drop to be sold. In most cases, Premium Packs sell out much quicker (though also have a lower number being sold).
+            
+            Note that this is only a subset of all Pack Drops; quite a few are reward drops with no sales information. Also, information regarding dates and specific details of drops before the 2022 season is sparse, and may be updated at a later date.
             """
-            - Packs are ordered by Number, so most recent releases are higher numbers.
-            - Packs are either `PREMIUM` or `STANDARD`, which is related to the number of Moments in a Pack, the Rarity of these Moments, and how much the Pack costs to purchase. There are also special `PLAYOFFS` packs, which are grouped in with `STANDARD` for analyses. 
-            - Series 1 were released prior to the 2022 NFL season, while Series 2 came out during this current season.
-            - Cost is how much Packs cost to mint (in USD). Non-zero costs were sold during Pack Drops, while those with a Cost of 0 were sent to NFL All Day Users as rewards (such as for gaining a certain amount of Playbook Yards).
-            - Supply is the number of Packs minted.  
-            """
         )
-        pack_info
-        st.write(
-            "Note: Number 29 was a test and never released, so not included in the table"
+        c1, c2 = st.columns(2)
+        date_range_choice = c1.radio(
+            "Choose how to view data",
+            ["By Date Range", "By Selected Drop"],
+            key="date_range_choice",
+            horizontal=True,
         )
-
-    st.subheader("Pack Sales")
-    st.caption('"She needs premium dude! Premium!" ~The Simpsons')
-    st.write(
-        f"""
-        Let's compare sales of the different pack types, `Standard` vs `Premium`.
-        Generally, Premium packs are much more expensive (~\$200+ vs ~\$60, though there are some exceptions), provide more Moments, and have more chance of getting higher Rarity Tiers for its Moments.
-        There are also fewer Premium Packs per drop.
-        
-        You can view pack sales by certain Date Ranges, or by a Selected Drop period.
-
-        On the left, you'll see the Sales per minute and Total Sales, broken down by Pack Type.
-        The left Chart shows the Sales per Minute plotted over the time period, while the right chart is a stacked histogram of Sales per minute (so the bar represents the number of minutes within various Sales per minute bins).
-
-        To view information for specific Pack Drops, a Pack Drop periods which has both a Standard and Premium pack can be chosen from the dropdown box. An additional comparison is shown for the Total Sales time- the time it takes between the first and last pack of a given drop to be sold. In most cases, Premium Packs sell out much quicker (though also have a lower number being sold).
-        
-        Note that this is only a subset of all Pack Drops; quite a few are reward drops with no sales information. Also, information regarding dates and specific details of drops before the 2022 season is sparse, and may be updated at a later date.
-        """
-    )
-    c1, c2 = st.columns(2)
-    date_range_choice = c1.radio(
-        "Choose how to view data",
-        ["By Date Range", "By Selected Drop"],
-        key="date_range_choice",
-        horizontal=True,
-    )
-    if date_range_choice == "By Date Range":
-        date_range = c2.selectbox(
-            "Date range:",
-            play_v_player_date_ranges,
-            key="select_pack_daterange",
+        if date_range_choice == "By Date Range":
+            date_range = c2.selectbox(
+                "Date range:",
+                play_v_player_date_ranges,
+                key="select_pack_daterange",
+            )
+            df = load_pack_cache(date_range)
+            df["Datetime_Pack"] = pd.to_datetime(df["Datetime_Pack"])
+        elif date_range_choice == "By Selected Drop":
+            date_range = c2.selectbox(
+                "Date range:",
+                pack_date_ranges,
+                format_func=lambda x: f"Drop starting on {x[0].split(' ')[0]}",
+                key="select_pack_drop_daterange",
+            )
+            df = load_pack_cache(date_range)
+            df["Datetime_Pack"] = pd.to_datetime(df["Datetime_Pack"])
+            standard_sales_time = (
+                df[df["Pack Type"] == "Standard"]["Datetime_Pack"].max()
+                - df[df["Pack Type"] == "Standard"]["Datetime_Pack"].min()
+            )
+            premium_sales_time = (
+                df[df["Pack Type"] == "Premium"]["Datetime_Pack"].max()
+                - df[df["Pack Type"] == "Premium"]["Datetime_Pack"].min()
+            )
+        standard_avg_sales_per_min = df[df["Pack Type"] == "Standard"]["Sales_Count"].mean()
+        premium_avg_sales_per_min = df[df["Pack Type"] == "Premium"]["Sales_Count"].mean()
+        standard_total_sales = df[df["Pack Type"] == "Standard"]["Sales_Count"].sum()
+        premium_total_sales = df[df["Pack Type"] == "Premium"]["Sales_Count"].sum()
+        # ---
+        st.write("---")
+        c1, c2 = st.columns([1, 3])
+        c1.metric(
+            "Average Sales per minute, Standard Packs", f"{standard_avg_sales_per_min:.2f}"
         )
-        df = load_pack_cache(date_range)
-        df["Datetime_Pack"] = pd.to_datetime(df["Datetime_Pack"])
-    elif date_range_choice == "By Selected Drop":
-        date_range = c2.selectbox(
-            "Date range:",
-            pack_date_ranges,
-            format_func=lambda x: f"Drop starting on {x[0].split(' ')[0]}",
-            key="select_pack_drop_daterange",
+        c1.metric(
+            "Average Sales per minute, Premium Packs", f"{premium_avg_sales_per_min:.2f}"
         )
-        df = load_pack_cache(date_range)
-        df["Datetime_Pack"] = pd.to_datetime(df["Datetime_Pack"])
-        standard_sales_time = (
-            df[df["Pack Type"] == "Standard"]["Datetime_Pack"].max()
-            - df[df["Pack Type"] == "Standard"]["Datetime_Pack"].min()
-        )
-        premium_sales_time = (
-            df[df["Pack Type"] == "Premium"]["Datetime_Pack"].max()
-            - df[df["Pack Type"] == "Premium"]["Datetime_Pack"].min()
-        )
-    standard_avg_sales_per_min = df[df["Pack Type"] == "Standard"]["Sales_Count"].mean()
-    premium_avg_sales_per_min = df[df["Pack Type"] == "Premium"]["Sales_Count"].mean()
-    standard_total_sales = df[df["Pack Type"] == "Standard"]["Sales_Count"].sum()
-    premium_total_sales = df[df["Pack Type"] == "Premium"]["Sales_Count"].sum()
-    # ---
-    st.write("---")
-    c1, c2 = st.columns([1, 3])
-    c1.metric(
-        "Average Sales per minute, Standard Packs", f"{standard_avg_sales_per_min:.2f}"
-    )
-    c1.metric(
-        "Average Sales per minute, Premium Packs", f"{premium_avg_sales_per_min:.2f}"
-    )
-    c1.write("---")
-    c1.metric("Total Sales, Standard Packs", f"{standard_total_sales:,.0f}")
-    c1.metric("Total Sales, Premium Packs", f"{premium_total_sales:,.0f}")
-    if date_range_choice == "By Selected Drop":
         c1.write("---")
-        c1.metric("Total Sales time, Standard Packs", f"{standard_sales_time}")
-        c1.metric("Total Sales time, Premium Packs", f"{premium_sales_time}")
+        c1.metric("Total Sales, Standard Packs", f"{standard_total_sales:,.0f}")
+        c1.metric("Total Sales, Premium Packs", f"{premium_total_sales:,.0f}")
+        if date_range_choice == "By Selected Drop":
+            c1.write("---")
+            c1.metric("Total Sales time, Standard Packs", f"{standard_sales_time}")
+            c1.metric("Total Sales time, Premium Packs", f"{premium_sales_time}")
 
-    chart = alt_pack_sales(df)
-    c2.altair_chart(chart, use_container_width=True)
+        chart = alt_pack_sales(df)
+        c2.altair_chart(chart, use_container_width=True)
 
-    st.header("Chase the Drop?")
-    st.write(
-        f"""
-        For the subset of Pack Drops with Premium and Standard packs, we'll compare the Price and Sales Count of Moments for Players that are in the Pack Drop. Time periods are shown from a few hours before the drop to about a day after the drop. The markeplace is closed during the time of the drop, so no sales will occur at this time
+        st.header("Chase the Drop?")
+        st.write(
+            f"""
+            For the subset of Pack Drops with Premium and Standard packs, we'll compare the Price and Sales Count of Moments for Players that are in the Pack Drop. Time periods are shown from a few hours before the drop to about a day after the drop. The markeplace is closed during the time of the drop, so no sales will occur at this time
 
-        Generally, Sales Counts are much higher for Moments in the Pack, though there is no clear difference in Price.
-        """
-    )
-    c1, c2 = st.columns(2)
-    date_range = c1.selectbox(
-        "Date range:",
-        pack_date_ranges[5:],
-        format_func=lambda x: f"Drop starting on {x[0].split(' ')[0]}",
-        key="select_player_mint_daterange",
-    )
-    pack_metric = c2.radio(
-        "Choose a metric", ["Price", "Count"], key="player_mint_metric", horizontal=True
-    )
-    date = date_range[0].split(" ")[0]
-    player_mint = load_player_mint(date)
-    st.write("---")
-    c1, c2 = st.columns([4, 3])
-    grouped_by_hour = (
-        player_mint.groupby(
-            [
-                pd.Grouper(key="Datetime", axis=0, freq="30min"),
-                "marketplace_id",
-                "Player",
-                "Team",
-                "Position",
-                "Moment_Tier",
-                "Moment_Date",
-                "site",
-                "minted_moment",
-                "minted_player",
-                "player_not_moment",
-                "player_moment"
-                # "Pack Type",
-            ]
+            Generally, Sales Counts are much higher for Moments in the Pack, though there is no clear difference in Price.
+            """
         )
-        .agg(
-            Price=("Price", "mean"),
-            Max_Price=("Price", "max"),
-            Min_Price=("Price", "min"),
-            Count=("marketplace_id", "count"),
+        c1, c2 = st.columns(2)
+        date_range = c1.selectbox(
+            "Date range:",
+            pack_date_ranges[5:],
+            format_func=lambda x: f"Drop starting on {x[0].split(' ')[0]}",
+            key="select_player_mint_daterange",
         )
-        .reset_index()
-    )
-    grouped_by_hour["after_mint"] = grouped_by_hour.Datetime > date_range[1]
-
-    chart = (
-        alt.Chart(
-            grouped_by_hour[
-                (grouped_by_hour.player_not_moment) | (grouped_by_hour.player_moment)
-            ],
-            title="Players in current Pack Drop",
+        pack_metric = c2.radio(
+            "Choose a metric", ["Price", "Count"], key="player_mint_metric", horizontal=True
         )
-        .mark_point(filled=True, size=75)
-        .encode(
-            x=alt.X(
-                "yearmonthdatehoursminutes(Datetime):T",
-                title=None,
-            ),
-            y=alt.Y(
-                pack_metric,
-                title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
-                scale=alt.Scale(type="log"),
-                stack=None,
-            ),
-            color=alt.Color("minted_moment", title="Moment from Pack Drop?"),
-            # size=alt.Size(
-            #     "after_mint",
-            #     title="After Pack Drop?",
-            #     scale=alt.Scale(domain=[True, False], range=[100, 25]),
-            # ),
-            shape=alt.Shape(
-                "Moment_Tier",
-                title="Rarity",
-                scale=alt.Scale(
-                    domain=["COMMON", "RARE", "LEGENDARY"],
-                    range=["circle", "triangle", "diamond"],
-                ),
-            ),
-            tooltip=[
-                alt.Tooltip("Player"),
-                alt.Tooltip("Position"),
-                alt.Tooltip("Team"),
-                alt.Tooltip("Moment_Tier", title="Moment Tier"),
-                alt.Tooltip("marketplace_id", title="Flow ID"),
-                alt.Tooltip("Price", title="Mean Price ($)", format=",.2f"),
-                alt.Tooltip("Max_Price", title="Max Price ($)", format=",.2f"),
-                alt.Tooltip("Min_Price", title="Min Price ($)", format=",.2f"),
-                alt.Tooltip("Count", title="Total Sales", format=","),
-                alt.Tooltip(
-                    "yearmonthdatehoursminutes(Datetime):T",
-                    title="Datetime",
-                ),
-            ],
-            href="site",
-        )
-        .properties(height=600, width=700)
-        .interactive()
-    )
-
-    grouped_by_id = (
-        player_mint.groupby(
-            [
-                "marketplace_id",
-                "Player",
-                "Team",
-                "Position",
-                "Moment_Tier",
-                "Moment_Date",
-                "site",
-                "minted_moment",
-                "minted_player",
-                "player_not_moment",
-                "player_moment"
-                # "Pack Type",
-            ]
-        )
-        .agg(
-            Price=("Price", "mean"),
-            Max_Price=("Price", "max"),
-            Min_Price=("Price", "min"),
-            Count=("marketplace_id", "count"),
-        )
-        .reset_index()
-    )
-
-    chart2 = (
-        alt.Chart(
-            grouped_by_id[
-                (grouped_by_id.player_not_moment) | (grouped_by_id.player_moment)
-            ],
-            title="Players in current Pack Drop",
-        )
-        .mark_point(filled=True, size=75)
-        .encode(
-            x=alt.X("Player:N", sort="-y"),
-            y=alt.Y(
-                pack_metric,
-                title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
-                scale=alt.Scale(type="log"),
-            ),
-            color=alt.Color("minted_moment", title="Moment from Pack Drop?"),
-            tooltip=[
-                alt.Tooltip("Player"),
-                alt.Tooltip("Position"),
-                alt.Tooltip("Team"),
-                alt.Tooltip("Moment_Tier", title="Moment Tier"),
-                alt.Tooltip("marketplace_id", title="Flow ID"),
-                alt.Tooltip("Price", title="Mean Price ($)", format=",.2f"),
-                alt.Tooltip("Max_Price", title="Max Price ($)", format=",.2f"),
-                alt.Tooltip("Min_Price", title="Min Price ($)", format=",.2f"),
-                alt.Tooltip("Count", title="Total Sales", format=","),
-            ],
-            shape=alt.Shape(
-                "Moment_Tier",
-                title="Rarity",
-                scale=alt.Scale(
-                    domain=["COMMON", "RARE", "LEGENDARY"],
-                    range=["circle", "triangle", "diamond"],
-                ),
-            ),
-            href="site",
-        )
-        .properties(height=600, width=700)
-        .interactive()
-    )
-    c1.altair_chart(chart2, use_container_width=True)
-    c2.altair_chart(chart, use_container_width=True)
-
-    pack_drop_time = pd.date_range(
-        start=date_range[0],
-        end=pd.to_datetime(date_range[1]) + pd.Timedelta("1d"),
-        freq="30min",
-        tz="US/Eastern",
-    ).difference(grouped_by_hour.Datetime.unique())
-    st.write("---")
-    c1, c2, c3 = st.columns(3)
-    pack_metric_title = "Price" if pack_metric == "Price" else "Sales Count"
-    if pack_metric == "Price":
-        c1.metric(
-            f"Overall Average {pack_metric_title}, Common Moment In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")][pack_metric].mean():,.2f}',
-        )
-        c1.metric(
-            f"Overall Average {pack_metric_title}, Common Moment Not In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")][pack_metric].mean():,.2f}',
-        )
-        c2.metric(
-            f"Overall Average {pack_metric_title}, Rare Moment In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")][pack_metric].mean():,.2f}',
-        )
-        c2.metric(
-            f"Overall Average {pack_metric_title}, Rare Moment Not In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")][pack_metric].mean():,.2f}',
-        )
-        c3.metric(
-            f"Overall Average {pack_metric_title}, Legendary Moment In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")][pack_metric].mean():,.2f}',
-        )
-        c3.metric(
-            f"Overall Average {pack_metric_title}, Legendary Moment Not In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")][pack_metric].mean():,.2f}',
-        )
-    else:
-        c1.metric(
-            f"Overall Average {pack_metric_title}, Common Moment In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")]["marketplace_id"].count():,.2f}',
-        )
-        c1.metric(
-            f"Overall Average {pack_metric_title}, Common Moment Not In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")]["marketplace_id"].count():,.2f}',
-        )
-        c2.metric(
-            f"Overall Average {pack_metric_title}, Rare Moment In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")]["marketplace_id"].count():,.2f}',
-        )
-        c2.metric(
-            f"Overall Average {pack_metric_title}, Rare Moment Not In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")]["marketplace_id"].count():,.2f}',
-        )
-        c3.metric(
-            f"Overall Average {pack_metric_title}, Legendary Moment In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")]["marketplace_id"].count():,.2f}',
-        )
-        c3.metric(
-            f"Overall Average {pack_metric_title}, Legendary Moment Not In Pack",
-            f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")]["marketplace_id"].count():,.2f}',
-        )
-
-    # #HACK running out of time to do something nice, will do this as a first attempt
-    try:
-        x = (
+        date = date_range[0].split(" ")[0]
+        player_mint = load_player_mint(date)
+        st.write("---")
+        c1, c2 = st.columns([4, 3])
+        grouped_by_hour = (
             player_mint.groupby(
-                ["Player", "marketplace_id", "minted_moment", "Moment_Tier"]
-            )["Price"]
-            .mean()
+                [
+                    pd.Grouper(key="Datetime", axis=0, freq="30min"),
+                    "marketplace_id",
+                    "Player",
+                    "Team",
+                    "Position",
+                    "Moment_Tier",
+                    "Moment_Date",
+                    "site",
+                    "minted_moment",
+                    "minted_player",
+                    "player_not_moment",
+                    "player_moment"
+                    # "Pack Type",
+                ]
+            )
+            .agg(
+                Price=("Price", "mean"),
+                Max_Price=("Price", "max"),
+                Min_Price=("Price", "min"),
+                Count=("marketplace_id", "count"),
+            )
             .reset_index()
         )
-        y = x.groupby(["Player", "Moment_Tier"]).nunique().reset_index()
-        y = y[y.minted_moment > 1]
-        x = x[x.Player.isin(y.Player)]
-        z = []
-        for _, row in y.iterrows():
-            try:
-                z.append(
-                    x[
-                        (x.Player == row.Player)
-                        & (x.Moment_Tier == row.Moment_Tier)
-                        & (x.minted_moment)
-                    ]
-                    .reset_index()
-                    .iloc[0]
-                )
-                z.append(
-                    x[
-                        (x.Player == row.Player)
-                        & (x.Moment_Tier == row.Moment_Tier)
-                        & ~(x.minted_moment)
-                    ]
-                    .reset_index()
-                    .iloc[0]
-                )
-            except:
-                pass
-        d = pd.DataFrame(z)
-        in_pack = d[d.minted_moment]["Price"].values
-        not_in_pack = d[~d.minted_moment]["Price"].values
-        ttest = ttest_rel(in_pack, not_in_pack)
+        grouped_by_hour["after_mint"] = grouped_by_hour.Datetime > date_range[1]
 
-        c1, c2 = st.columns(2)
-        c1.write(
-            f"For Players with Moments of the same Rarity Tier both in the Pack Drop and not in the pack drop, is there a difference in {pack_metric_title}?"
-        )
-        if ttest.pvalue < 0.05:
-            ans = "Yes!"
-            desc = f" pvalue={ttest.pvalue:.2f}"
-        else:
-            ans = "No"
-            desc = f"- pvalue={ttest.pvalue:.2f}"
-        c2.metric(
-            f"${in_pack.mean():,.2f} (in pack) vs ${not_in_pack.mean():,.2f} (not in pack)",
-            ans,
-            desc,
-        )
-    except:
-        pass
-    # #---
-
-    st.header("Pack Drop: Week 1 and 2 of the 2022 Season")
-    st.write(
-        f"""
-        We'll go more in depth for the first Pack Drop of the 2022 Season, covering Weeks 1 and 2. This occured on 2022-09-27 if you would like to investigate it in the previous sections.
-
-        Choose a metric (Price or Count of Sales) to compare for each of the moments within this release, as well as the average based on Moment Rarity Tier.
-
-        """
-    )
-    c1, c2 = st.columns([1, 3])
-    series2_mint1_grouped = load_series2_mint1_grouped()
-    avg_pack_metrics = get_avg_pack_metrics(series2_mint1_grouped)
-    pack_metric = c1.radio("Choose a metric", ["Price", "Count"], key="pack_metric")
-    pack_metric_title = "Price" if pack_metric == "Price" else "Sales Count"
-    c1.metric(
-        f"Overall Average {pack_metric_title}, Common",
-        f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["COMMON"]:,.2f}',
-    )
-    c1.metric(
-        f"Overall Average {pack_metric_title}, Rare",
-        f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["RARE"]:,.2f}',
-    )
-    c1.metric(
-        f"Overall Average {pack_metric_title}, Legendary",
-        f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["LEGENDARY"]:,.2f}',
-    )
-    chart = (
-        (
-            alt.Chart(series2_mint1_grouped)
-            .mark_bar()
+        chart = (
+            alt.Chart(
+                grouped_by_hour[
+                    (grouped_by_hour.player_not_moment) | (grouped_by_hour.player_moment)
+                ],
+                title="Players in current Pack Drop",
+            )
+            .mark_point(filled=True, size=75)
             .encode(
-                x=alt.X("Player", sort="-y", title=None),
+                x=alt.X(
+                    "yearmonthdatehoursminutes(Datetime):T",
+                    title=None,
+                ),
                 y=alt.Y(
                     pack_metric,
                     title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
                     scale=alt.Scale(type="log"),
                     stack=None,
+                ),
+                color=alt.Color("minted_moment", title="Moment from Pack Drop?"),
+                # size=alt.Size(
+                #     "after_mint",
+                #     title="After Pack Drop?",
+                #     scale=alt.Scale(domain=[True, False], range=[100, 25]),
+                # ),
+                shape=alt.Shape(
+                    "Moment_Tier",
+                    title="Rarity",
+                    scale=alt.Scale(
+                        domain=["COMMON", "RARE", "LEGENDARY"],
+                        range=["circle", "triangle", "diamond"],
+                    ),
                 ),
                 tooltip=[
                     alt.Tooltip("Player"),
@@ -520,147 +281,394 @@ with tab5:
                     alt.Tooltip("Team"),
                     alt.Tooltip("Moment_Tier", title="Moment Tier"),
                     alt.Tooltip("marketplace_id", title="Flow ID"),
-                    # alt.Tooltip("Pack Type"),
-                    alt.Tooltip("Total_Circulation", title="Total Circulation"),
+                    alt.Tooltip("Price", title="Mean Price ($)", format=",.2f"),
+                    alt.Tooltip("Max_Price", title="Max Price ($)", format=",.2f"),
+                    alt.Tooltip("Min_Price", title="Min Price ($)", format=",.2f"),
+                    alt.Tooltip("Count", title="Total Sales", format=","),
+                    alt.Tooltip(
+                        "yearmonthdatehoursminutes(Datetime):T",
+                        title="Datetime",
+                    ),
+                ],
+                href="site",
+            )
+            .properties(height=600, width=700)
+            .interactive()
+        )
+
+        grouped_by_id = (
+            player_mint.groupby(
+                [
+                    "marketplace_id",
+                    "Player",
+                    "Team",
+                    "Position",
+                    "Moment_Tier",
+                    "Moment_Date",
+                    "site",
+                    "minted_moment",
+                    "minted_player",
+                    "player_not_moment",
+                    "player_moment"
+                    # "Pack Type",
+                ]
+            )
+            .agg(
+                Price=("Price", "mean"),
+                Max_Price=("Price", "max"),
+                Min_Price=("Price", "min"),
+                Count=("marketplace_id", "count"),
+            )
+            .reset_index()
+        )
+
+        chart2 = (
+            alt.Chart(
+                grouped_by_id[
+                    (grouped_by_id.player_not_moment) | (grouped_by_id.player_moment)
+                ],
+                title="Players in current Pack Drop",
+            )
+            .mark_point(filled=True, size=75)
+            .encode(
+                x=alt.X("Player:N", sort="-y"),
+                y=alt.Y(
+                    pack_metric,
+                    title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
+                    scale=alt.Scale(type="log"),
+                ),
+                color=alt.Color("minted_moment", title="Moment from Pack Drop?"),
+                tooltip=[
+                    alt.Tooltip("Player"),
+                    alt.Tooltip("Position"),
+                    alt.Tooltip("Team"),
+                    alt.Tooltip("Moment_Tier", title="Moment Tier"),
+                    alt.Tooltip("marketplace_id", title="Flow ID"),
                     alt.Tooltip("Price", title="Mean Price ($)", format=",.2f"),
                     alt.Tooltip("Max_Price", title="Max Price ($)", format=",.2f"),
                     alt.Tooltip("Min_Price", title="Min Price ($)", format=",.2f"),
                     alt.Tooltip("Count", title="Total Sales", format=","),
                 ],
-                order=alt.Order(pack_metric, sort="descending"),
-                color=alt.Color(
-                    f"Moment_Tier",
-                    title="Moment Tier",
-                    sort=["Common", "Rare", "Legendary"],
-                    # scale=alt.Scale(
-                    #     scheme="paired",
-                    # ),
+                shape=alt.Shape(
+                    "Moment_Tier",
+                    title="Rarity",
+                    scale=alt.Scale(
+                        domain=["COMMON", "RARE", "LEGENDARY"],
+                        range=["circle", "triangle", "diamond"],
+                    ),
                 ),
-                # opacity=alt.Opacity("Pack Type", scale=alt.Scale(domain=["Standard", "Premium"], range=[.8 ,.6])),
-                # row=alt.Row("Pack Type", title=None),
                 href="site",
             )
+            .properties(height=600, width=700)
+            .interactive()
         )
-        .interactive()
-        .properties(height=700, width=800)
-    )
-    c2.altair_chart(chart)
+        c1.altair_chart(chart2, use_container_width=True)
+        c2.altair_chart(chart, use_container_width=True)
 
-    st.subheader("Try your luck at minting a pack!")
-    simulation = load_simulation()
-    info = simulation.groupby('Pack Type').agg(mean=('Price', 'mean'), median=('Price', 'median')).reset_index()
-    
-    c1, c2 = st.columns(2)
-    c1.write(
-        f"""
-        We used actual sales data to see the value of Moments available in the Series 2, Week 1-2 Packs.
-        Choose your pack type, and click the button to simulate a mint!
-
-        Note: the process used here does not capture the rarity of certain moments (such as some Rare Moments having lower total numbers than other Rare Moments), however it does capture the frequency at which each Moment is traded. More liquid Moments (with higher numbers of sales) will be more likely to appear. Pack mints were precomputed (10,000 times for Standard packs and 5,000 times for Premium packs) due to computational resources.
-
-        We ran a simulation 1000 times, and found the following:
-        - For Standard packs, the mean value is \${info[info['Pack Type']=='Standard']['mean'].values[0]:.2f} (median value is \${info[info['Pack Type']=='Standard']['median'].values[0]:.2f}). {info[info['Pack Type']=='Standard']['mean'].values[0]:.2f}). {simulation[simulation['Pack Type']=='Standard'][simulation.Price > 59].Price.count() / len(simulation[simulation['Pack Type']=='Standard']):.2%} of the time, the value is more than the $59 price.
-        - For Premium packs, the mean value is \${info[info['Pack Type']=='Premium']['mean'].values[0]:.2f} (median value is \${info[info['Pack Type']=='Premium']['median'].values[0]:.2f}). {simulation[simulation['Pack Type']=='Premium'][simulation.Price > 219].Price.count() / len(simulation[simulation['Pack Type']=='Premium']):.2%} of the time, the value is more than the $219 price.
-        """
-    )
-    
-
-    chart = (
-        alt.Chart(simulation)
-        .mark_boxplot()
-        .encode(
-            x="Pack Type",
-            y=alt.Y("Price", title="Pack Value", scale=alt.Scale(type="log")),
-            tooltip=[alt.Tooltip("Price", title="Pack Value")],
-        )
-        .properties(height=500, width=300)
-    )
-    rules = (
-        alt.Chart(
-            pd.DataFrame(
-                {
-                    "Pack Type": [
-                        "Standard",
-                        "Premium",
-                    ],
-                    "Pack Value": [59, 219],
-                    "Color": ["#a0a0ad", "#c29c55"],
-                }
+        pack_drop_time = pd.date_range(
+            start=date_range[0],
+            end=pd.to_datetime(date_range[1]) + pd.Timedelta("1d"),
+            freq="30min",
+            tz="US/Eastern",
+        ).difference(grouped_by_hour.Datetime.unique())
+        st.write("---")
+        c1, c2, c3 = st.columns(3)
+        pack_metric_title = "Price" if pack_metric == "Price" else "Sales Count"
+        if pack_metric == "Price":
+            c1.metric(
+                f"Overall Average {pack_metric_title}, Common Moment In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")][pack_metric].mean():,.2f}',
             )
-        )
-        .mark_rule(strokeDash=[10, 4], opacity=0.7)
-        .encode(
-            # x="Pack Type",
-            y="Pack Value",
-            color=alt.Color("Color:N", scale=None),
-            strokeWidth=alt.value(1),
-        )
-    )
-    c2.altair_chart(chart + rules)
-
-
-    st.write('---')
-    cols = st.columns(5)
-    pack_choice = cols[0].radio(
-        "Which pack type?",
-        ["Standard", "Premium"],
-        format_func=lambda x: f"{x} (cost: ${59 if x=='Standard' else 219})",
-        horizontal=True,
-        key="pack_choice",
-    )
-    pack_button = cols[0].button("Mint Pack!", key="mint_pack")
-
-    sample_df = load_pack_samples()
-
-    if pack_button:
-        players = mint_pack(sample_df, pack_choice)
-        n_common = players[players["Moment_Tier"] == "COMMON"].Player.count()
-        n_rare = players[players["Moment_Tier"] == "RARE"].Player.count()
-        n_legendary = players[players["Moment_Tier"] == "LEGENDARY"].Player.count()
-        total_val_average = (
-            avg_pack_metrics["Price"]["COMMON"] * n_common
-            + avg_pack_metrics["Price"]["RARE"] * n_rare
-            + avg_pack_metrics["Price"]["LEGENDARY"] * n_legendary
-        )
-        if n_legendary > 0:
-            pack_type = "Legendary"
-        elif n_rare > 0:
-            pack_type = "Rare"
+            c1.metric(
+                f"Overall Average {pack_metric_title}, Common Moment Not In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")][pack_metric].mean():,.2f}',
+            )
+            c2.metric(
+                f"Overall Average {pack_metric_title}, Rare Moment In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")][pack_metric].mean():,.2f}',
+            )
+            c2.metric(
+                f"Overall Average {pack_metric_title}, Rare Moment Not In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")][pack_metric].mean():,.2f}',
+            )
+            c3.metric(
+                f"Overall Average {pack_metric_title}, Legendary Moment In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")][pack_metric].mean():,.2f}',
+            )
+            c3.metric(
+                f"Overall Average {pack_metric_title}, Legendary Moment Not In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")][pack_metric].mean():,.2f}',
+            )
         else:
-            pack_type = "Common"
-
-        for i, x in players.reset_index(drop=True).iterrows():
-            cols[i % 4 + 1].subheader(f"[{x.Player}]({x.site})")
-            cols[i % 4 + 1].write(f"**Rarity**: {x.Moment_Tier.title()}")
-            cols[i % 4 + 1].write(f"**Price**: ${x.Price:.2f}")
-            headshot_url = x["headshot_url"]
-            image = load_headshot(headshot_url)
-            cols[i % 4 + 1].image(
-                image,
-                use_column_width="auto",
+            c1.metric(
+                f"Overall Average {pack_metric_title}, Common Moment In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")]["marketplace_id"].count():,.2f}',
             )
-            cols[i % 4 + 1].write("---")
-        total_price = players.Price.sum()
-        if pack_choice == "Premium":
-            if total_price > 219:
-                diff_str = f"${total_price - 219:.2f} Estimated Profit!"
-            else:
-                diff_str = f"- ${total_price - 219:.2f} Estimated Profit!"
-        elif pack_choice == "Standard":
-            if total_price > 59:
-                diff_str = f"${total_price - 59:.2f} Estimated Profit!"
-            else:
-                diff_str = f"- ${total_price - 59:.2f} Estimated Loss"
-        if total_price >= total_val_average:
-            avg_str = f"Your pack is ${total_price -total_val_average:.2f} higher!"
-        elif total_price < total_val_average:
-            avg_str = f"-Your pack is ${total_price -total_val_average:.2f} lower"
+            c1.metric(
+                f"Overall Average {pack_metric_title}, Common Moment Not In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="COMMON")]["marketplace_id"].count():,.2f}',
+            )
+            c2.metric(
+                f"Overall Average {pack_metric_title}, Rare Moment In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")]["marketplace_id"].count():,.2f}',
+            )
+            c2.metric(
+                f"Overall Average {pack_metric_title}, Rare Moment Not In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="RARE")]["marketplace_id"].count():,.2f}',
+            )
+            c3.metric(
+                f"Overall Average {pack_metric_title}, Legendary Moment In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")]["marketplace_id"].count():,.2f}',
+            )
+            c3.metric(
+                f"Overall Average {pack_metric_title}, Legendary Moment Not In Pack",
+                f'{"$" if pack_metric_title == "Price" else ""}{player_mint[~(player_mint.minted_moment) & (player_mint.Moment_Tier=="LEGENDARY")]["marketplace_id"].count():,.2f}',
+            )
 
-        cols[0].metric("Pack Type", pack_type)
-        cols[0].metric("Total Value of Your Pack", f"${total_price:.2f}", diff_str)
-        cols[0].metric(
-            "Average Value of Pack Type", f"${total_val_average:.2f}", avg_str
+        # #HACK running out of time to do something nice, will do this as a first attempt
+        try:
+            x = (
+                player_mint.groupby(
+                    ["Player", "marketplace_id", "minted_moment", "Moment_Tier"]
+                )["Price"]
+                .mean()
+                .reset_index()
+            )
+            y = x.groupby(["Player", "Moment_Tier"]).nunique().reset_index()
+            y = y[y.minted_moment > 1]
+            x = x[x.Player.isin(y.Player)]
+            z = []
+            for _, row in y.iterrows():
+                try:
+                    z.append(
+                        x[
+                            (x.Player == row.Player)
+                            & (x.Moment_Tier == row.Moment_Tier)
+                            & (x.minted_moment)
+                        ]
+                        .reset_index()
+                        .iloc[0]
+                    )
+                    z.append(
+                        x[
+                            (x.Player == row.Player)
+                            & (x.Moment_Tier == row.Moment_Tier)
+                            & ~(x.minted_moment)
+                        ]
+                        .reset_index()
+                        .iloc[0]
+                    )
+                except:
+                    pass
+            d = pd.DataFrame(z)
+            in_pack = d[d.minted_moment]["Price"].values
+            not_in_pack = d[~d.minted_moment]["Price"].values
+            ttest = ttest_rel(in_pack, not_in_pack)
+
+            c1, c2 = st.columns(2)
+            c1.write(
+                f"For Players with Moments of the same Rarity Tier both in the Pack Drop and not in the pack drop, is there a difference in {pack_metric_title}?"
+            )
+            if ttest.pvalue < 0.05:
+                ans = "Yes!"
+                desc = f" pvalue={ttest.pvalue:.2f}"
+            else:
+                ans = "No"
+                desc = f"- pvalue={ttest.pvalue:.2f}"
+            c2.metric(
+                f"${in_pack.mean():,.2f} (in pack) vs ${not_in_pack.mean():,.2f} (not in pack)",
+                ans,
+                desc,
+            )
+        except:
+            pass
+        # #---
+
+        st.header("Pack Drop: Week 1 and 2 of the 2022 Season")
+        st.write(
+            f"""
+            We'll go more in depth for the first Pack Drop of the 2022 Season, covering Weeks 1 and 2. This occured on 2022-09-27 if you would like to investigate it in the previous sections.
+
+            Choose a metric (Price or Count of Sales) to compare for each of the moments within this release, as well as the average based on Moment Rarity Tier.
+
+            """
         )
+        c1, c2 = st.columns([1, 3])
+        series2_mint1_grouped = load_series2_mint1_grouped()
+        avg_pack_metrics = get_avg_pack_metrics(series2_mint1_grouped)
+        pack_metric = c1.radio("Choose a metric", ["Price", "Count"], key="pack_metric")
+        pack_metric_title = "Price" if pack_metric == "Price" else "Sales Count"
+        c1.metric(
+            f"Overall Average {pack_metric_title}, Common",
+            f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["COMMON"]:,.2f}',
+        )
+        c1.metric(
+            f"Overall Average {pack_metric_title}, Rare",
+            f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["RARE"]:,.2f}',
+        )
+        c1.metric(
+            f"Overall Average {pack_metric_title}, Legendary",
+            f'{"$" if pack_metric_title == "Price" else ""}{avg_pack_metrics[pack_metric]["LEGENDARY"]:,.2f}',
+        )
+        chart = (
+            (
+                alt.Chart(series2_mint1_grouped)
+                .mark_bar()
+                .encode(
+                    x=alt.X("Player", sort="-y", title=None),
+                    y=alt.Y(
+                        pack_metric,
+                        title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
+                        scale=alt.Scale(type="log"),
+                        stack=None,
+                    ),
+                    tooltip=[
+                        alt.Tooltip("Player"),
+                        alt.Tooltip("Position"),
+                        alt.Tooltip("Team"),
+                        alt.Tooltip("Moment_Tier", title="Moment Tier"),
+                        alt.Tooltip("marketplace_id", title="Flow ID"),
+                        # alt.Tooltip("Pack Type"),
+                        alt.Tooltip("Total_Circulation", title="Total Circulation"),
+                        alt.Tooltip("Price", title="Mean Price ($)", format=",.2f"),
+                        alt.Tooltip("Max_Price", title="Max Price ($)", format=",.2f"),
+                        alt.Tooltip("Min_Price", title="Min Price ($)", format=",.2f"),
+                        alt.Tooltip("Count", title="Total Sales", format=","),
+                    ],
+                    order=alt.Order(pack_metric, sort="descending"),
+                    color=alt.Color(
+                        f"Moment_Tier",
+                        title="Moment Tier",
+                        sort=["Common", "Rare", "Legendary"],
+                        # scale=alt.Scale(
+                        #     scheme="paired",
+                        # ),
+                    ),
+                    # opacity=alt.Opacity("Pack Type", scale=alt.Scale(domain=["Standard", "Premium"], range=[.8 ,.6])),
+                    # row=alt.Row("Pack Type", title=None),
+                    href="site",
+                )
+            )
+            .interactive()
+            .properties(height=700, width=800)
+        )
+        c2.altair_chart(chart)
+
+        st.subheader("Try your luck at minting a pack!")
+        simulation = load_simulation()
+        info = simulation.groupby('Pack Type').agg(mean=('Price', 'mean'), median=('Price', 'median')).reset_index()
+        
+        c1, c2 = st.columns(2)
+        c1.write(
+            f"""
+            We used actual sales data to see the value of Moments available in the Series 2, Week 1-2 Packs.
+            Choose your pack type, and click the button to simulate a mint!
+
+            Note: the process used here does not capture the rarity of certain moments (such as some Rare Moments having lower total numbers than other Rare Moments), however it does capture the frequency at which each Moment is traded. More liquid Moments (with higher numbers of sales) will be more likely to appear. Pack mints were precomputed (10,000 times for Standard packs and 5,000 times for Premium packs) due to computational resources.
+
+            We ran a simulation 1000 times, and found the following:
+            - For Standard packs, the mean value is \${info[info['Pack Type']=='Standard']['mean'].values[0]:.2f} (median value is \${info[info['Pack Type']=='Standard']['median'].values[0]:.2f}). {info[info['Pack Type']=='Standard']['mean'].values[0]:.2f}). {simulation[simulation['Pack Type']=='Standard'][simulation.Price > 59].Price.count() / len(simulation[simulation['Pack Type']=='Standard']):.2%} of the time, the value is more than the $59 price.
+            - For Premium packs, the mean value is \${info[info['Pack Type']=='Premium']['mean'].values[0]:.2f} (median value is \${info[info['Pack Type']=='Premium']['median'].values[0]:.2f}). {simulation[simulation['Pack Type']=='Premium'][simulation.Price > 219].Price.count() / len(simulation[simulation['Pack Type']=='Premium']):.2%} of the time, the value is more than the $219 price.
+            """
+        )
+        
+
+        chart = (
+            alt.Chart(simulation)
+            .mark_boxplot()
+            .encode(
+                x="Pack Type",
+                y=alt.Y("Price", title="Pack Value", scale=alt.Scale(type="log")),
+                tooltip=[alt.Tooltip("Price", title="Pack Value")],
+            )
+            .properties(height=500, width=300)
+        )
+        rules = (
+            alt.Chart(
+                pd.DataFrame(
+                    {
+                        "Pack Type": [
+                            "Standard",
+                            "Premium",
+                        ],
+                        "Pack Value": [59, 219],
+                        "Color": ["#a0a0ad", "#c29c55"],
+                    }
+                )
+            )
+            .mark_rule(strokeDash=[10, 4], opacity=0.7)
+            .encode(
+                # x="Pack Type",
+                y="Pack Value",
+                color=alt.Color("Color:N", scale=None),
+                strokeWidth=alt.value(1),
+            )
+        )
+        c2.altair_chart(chart + rules)
+
+
+        st.write('---')
+        cols = st.columns(5)
+        pack_choice = cols[0].radio(
+            "Which pack type?",
+            ["Standard", "Premium"],
+            format_func=lambda x: f"{x} (cost: ${59 if x=='Standard' else 219})",
+            horizontal=True,
+            key="pack_choice",
+        )
+        pack_button = cols[0].button("Mint Pack!", key="mint_pack")
+
+        sample_df = load_pack_samples()
+
+        if pack_button:
+            players = mint_pack(sample_df, pack_choice)
+            n_common = players[players["Moment_Tier"] == "COMMON"].Player.count()
+            n_rare = players[players["Moment_Tier"] == "RARE"].Player.count()
+            n_legendary = players[players["Moment_Tier"] == "LEGENDARY"].Player.count()
+            total_val_average = (
+                avg_pack_metrics["Price"]["COMMON"] * n_common
+                + avg_pack_metrics["Price"]["RARE"] * n_rare
+                + avg_pack_metrics["Price"]["LEGENDARY"] * n_legendary
+            )
+            if n_legendary > 0:
+                pack_type = "Legendary"
+            elif n_rare > 0:
+                pack_type = "Rare"
+            else:
+                pack_type = "Common"
+
+            for i, x in players.reset_index(drop=True).iterrows():
+                cols[i % 4 + 1].subheader(f"[{x.Player}]({x.site})")
+                cols[i % 4 + 1].write(f"**Rarity**: {x.Moment_Tier.title()}")
+                cols[i % 4 + 1].write(f"**Price**: ${x.Price:.2f}")
+                headshot_url = x["headshot_url"]
+                image = load_headshot(headshot_url)
+                cols[i % 4 + 1].image(
+                    image,
+                    use_column_width="auto",
+                )
+                cols[i % 4 + 1].write("---")
+            total_price = players.Price.sum()
+            if pack_choice == "Premium":
+                if total_price > 219:
+                    diff_str = f"${total_price - 219:.2f} Estimated Profit!"
+                else:
+                    diff_str = f"- ${total_price - 219:.2f} Estimated Profit!"
+            elif pack_choice == "Standard":
+                if total_price > 59:
+                    diff_str = f"${total_price - 59:.2f} Estimated Profit!"
+                else:
+                    diff_str = f"- ${total_price - 59:.2f} Estimated Loss"
+            if total_price >= total_val_average:
+                avg_str = f"Your pack is ${total_price -total_val_average:.2f} higher!"
+            elif total_price < total_val_average:
+                avg_str = f"-Your pack is ${total_price -total_val_average:.2f} lower"
+
+            cols[0].metric("Pack Type", pack_type)
+            cols[0].metric("Total Value of Your Pack", f"${total_price:.2f}", diff_str)
+            cols[0].metric(
+                "Average Value of Pack Type", f"${total_val_average:.2f}", avg_str
+            )
 
 
 with tab4:
