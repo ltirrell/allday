@@ -143,6 +143,15 @@ def get_team_query(team):
     return query
 
 
+def get_team_date_query(team):
+    env = Environment(loader=FileSystemLoader("./sql"))
+    template1 = env.get_template("sdk_allday_date1.sql")
+    query1 = template1.render({"team": f"'{team}'"})
+    template2 = env.get_template("sdk_allday_date2.sql")
+    query2 = template2.render({"team": f"'{team}'"})
+    return query1, query2
+
+
 def get_date_query(date, sql_file):
     env = Environment(loader=FileSystemLoader("./sql"))
     template = env.get_template(sql_file)
@@ -161,11 +170,29 @@ def get_flipside_team_data(team, save=True):
     dt_string = get_datetime_string()
     output_dir = Path(f"data/{dt_string}")
     output_dir.mkdir(exist_ok=True)
-    output_file = output_dir/ f"{dt_string}_team--{team.replace(' ', '_')}.csv.gz"
+    output_file = output_dir / f"{dt_string}_team--{team.replace(' ', '_')}.csv.gz"
     if not output_file.exists():
-        query = get_team_query(team)
-        query_result_set = sdk.query(query)
-        df = pd.DataFrame(query_result_set.rows, columns=query_result_set.columns)
+        if team in [
+            "Cincinnati Bengals",
+            "Kansas City Chiefs",
+            "Los Angeles Rams",
+        ]:
+            q1, q2 = get_team_date_query(team)
+            query_result_set1 = sdk.query(q1)
+            df1 = pd.DataFrame(
+                query_result_set1.rows, columns=query_result_set1.columns
+            )
+
+            query_result_set2 = sdk.query(q2)
+            df2 = pd.DataFrame(
+                query_result_set2.rows, columns=query_result_set2.columns
+            )
+
+            df = pd.concat([df1, df2]).reset_index(drop=True)
+        else:
+            query = get_team_query(team)
+            query_result_set = sdk.query(query)
+            df = pd.DataFrame(query_result_set.rows, columns=query_result_set.columns)
         if save:
             print(f"Saving {output_file}...")
             df.to_csv(
@@ -401,7 +428,7 @@ def get_game_outcome(row):
 if __name__ == "__main__":
     # #TODO: turn on when updating
     pack_dir = Path("data/packs")
-    with Pool(16) as p:
+    with Pool() as p:
         pack_data_func = partial(
             get_flipside_pack_data, sql_file="sdk_packs.sql", output_str="pack_sales"
         )
@@ -418,7 +445,9 @@ if __name__ == "__main__":
         pack_dir, f"*pack_sales--*csv.gz", ["Datetime", "Price"]
     )
     # #HACK: empirically found prices for Standard v Premium, PLAYOFFS grouped in with Standard
-    pack_df['Pack Type'] = pack_df.Price.apply(lambda x: 'Standard' if x < 79 or x == 84 else 'Premium')
+    pack_df["Pack Type"] = pack_df.Price.apply(
+        lambda x: "Standard" if x < 79 or x == 84 else "Premium"
+    )
     pack_df.to_csv(
         "data/pack_data.csv.gz",
         index=False,
@@ -463,10 +492,10 @@ if __name__ == "__main__":
     )
 
     data_dir = Path("data", get_datetime_string())
-    with Pool(16) as p:
+    with Pool() as p:
         p.map(get_flipside_team_data, teams)
 
-    df = combine_flipside_data(data_dir, f"*_team--*csv.gz",["Date", "Player"])
+    df = combine_flipside_data(data_dir, f"*_team--*csv.gz", ["Date", "Player"])
     sales_counts = (
         df.groupby("NFT_ID")["tx_id"]
         .count()
@@ -520,10 +549,10 @@ if __name__ == "__main__":
     weekly_data.to_csv("data/weekly_data.csv", index=False)
 
     # #TODO: turn on when updating
-    nfl.cache_pbp(
-        get_years_after_date(years, 1999),
-        downcast=False,
-    )
+    # nfl.cache_pbp(
+    #     get_years_after_date(years, 1999),
+    #     downcast=False,
+    # )
     pbp_data = nfl.import_pbp_data(
         get_years_after_date(years, 1999),
         downcast=False,
@@ -550,6 +579,12 @@ if __name__ == "__main__":
         index=False,
         compression="gzip",
     )
+
+    players = pd.DataFrame(
+        main_with_td[main_with_td.Player != main_with_td.Team].Player.unique(),
+        columns=["Player"],
+    )
+    players.to_csv("data/players.csv", index=False)
 
     merged = main_with_td.merge(
         combined_df[

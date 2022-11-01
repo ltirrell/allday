@@ -1,42 +1,42 @@
 marketplace_id,Player,Team,Position,Moment_Tier,Moment_Date,Total_Circulation,site,Price,Max_Price,Min_Price,Count
-1038.0,Kyler Murray,Arizona Cardinals,QB,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1038,11.68953386103782,95.0,7.0,1137
-1039.0,Drake London,Atlanta Falcons,WR,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1039,28.122280570142536,750.0,12.0,2666
-1040.0,Kareem Hunt,Cleveland Browns,RB,COMMON,2022-09-11 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1040,10.254976303317536,150.0,5.0,1055
-1041.0,Micah Parsons,Dallas Cowboys,LB,COMMON,2022-09-11 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1041,12.432069510268562,60.0,7.0,1266
-1042.0,Tony Pollard,Dallas Cowboys,RB,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1042,10.615141955835963,200.0,6.0,1902
-1043.0,Allen Robinson II,Los Angeles Rams,WR,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1043,9.589364844903988,75.0,5.0,1354
-1044.0,Garrett Wilson,New York Jets,WR,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1044,24.028685258964142,1000.0,10.0,1255
-1045.0,Geno Smith,Seattle Seahawks,QB,COMMON,2022-09-12 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1045,11.481449525452977,399.0,7.0,2318
-1046.0,Mike Evans,Tampa Bay Buccaneers,WR,COMMON,2022-09-11 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1046,17.901680672268906,613.0,6.0,2380
-1048.0,Derwin James Jr.,Los Angeles Chargers,DB,COMMON,2022-09-15 00:00:00.000,5000.0,https://nflallday.com/listing/moment/1048,15.376602564102564,75.0,9.0,624
-1049.0,Decobie Durant,Los Angeles Rams,DB,COMMON,2022-09-18 00:00:00.000,5000.0,https://nflallday.com/listing/moment/1049,11.145833333333334,60.0,6.0,576
-1050.0,Julian Love,New York Giants,DB,COMMON,2022-09-18 00:00:00.000,5000.0,https://nflallday.com/listing/moment/1050,8.476449275362318,24.0,2.0,552
-1051.0,Sammy Watkins,Green Bay Packers,WR,COMMON,2022-09-18 00:00:00.000,6000.0,https://nflallday.com/listing/moment/1051,8.71888111888112,106.0,5.0,715
-1052.0,Najee Harris,Pittsburgh Steelers,RB,COMMON,2022-09-18 00:00:00.000,6000.0,https://nflallday.com/listing/moment/1052,11.659846547314578,30.0,7.0,782
-1053.0,Sterling Shepard,New York Giants,WR,COMMON,2022-09-11 00:00:00.000,7000.0,https://nflallday.com/listing/moment/1053,7.48238897396631,28.0,4.0,653
-1054.0,Byron Murphy Jr.,Arizona Cardinals,DB,COMMON,2022-09-18 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1054,9.241379310344827,63.0,6.0,435
-1055.0,Cade York,Cleveland Browns,K,COMMON,2022-09-11 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1055,19.58115671641791,500.0,6.0,1072
-1056.0,Cooper Rush,Dallas Cowboys,QB,COMMON,2022-09-18 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1056,16.91581342434585,39.0,9.0,879
-1057.0,Jaire Alexander,Green Bay Packers,DB,COMMON,2022-09-18 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1057,12.520868113522537,55.0,6.0,599
-1058.0,Marcus Williams,Baltimore Ravens,DB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1058,40.56890459363957,149.0,28.0,283
-1059.0,Nick Chubb,Cleveland Browns,RB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1059,68.8984771573604,199.0,6.0,197
-1060.0,Amon-Ra St. Brown,Detroit Lions,WR,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1060,69.44951140065146,95.0,45.0,307
-1061.0,James Robinson,Jacksonville Jaguars,RB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1061,47.295180722891565,527.0,27.0,166
-1062.0,Saquon Barkley,New York Giants,RB,RARE,2022-09-11 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1062,97.04081632653062,195.0,65.0,245
-1063.0,Diontae Johnson,Pittsburgh Steelers,WR,RARE,2022-09-11 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1063,47.66463414634146,160.0,30.0,164
-1064.0,Jimmy Garoppolo,San Francisco 49ers,QB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1064,55.52654867256637,150.0,30.0,226
-1065.0,Devin Duvernay,Baltimore Ravens,WR,RARE,2022-09-18 00:00:00.000,799.0,https://nflallday.com/listing/moment/1065,71.57740585774059,399.0,49.0,239
-1066.0,Jaylen Watson,Kansas City Chiefs,DB,RARE,2022-09-15 00:00:00.000,899.0,https://nflallday.com/listing/moment/1066,57.68599033816425,199.0,35.0,207
-1067.0,D.J. Reed,New York Jets,DB,RARE,2022-09-11 00:00:00.000,899.0,https://nflallday.com/listing/moment/1067,38.541666666666664,500.0,25.0,192
-1068.0,Jamel Dean,Tampa Bay Buccaneers,DB,RARE,2022-09-18 00:00:00.000,899.0,https://nflallday.com/listing/moment/1068,55.487584650112865,90.0,28.0,443
-1069.0,Jeffery Simmons,Tennessee Titans,DL,RARE,2022-09-11 00:00:00.000,699.0,https://nflallday.com/listing/moment/1069,58.035812672176306,980.0,33.0,363
-1070.0,Nelson Agholor,New England Patriots,WR,RARE,2022-09-18 00:00:00.000,999.0,https://nflallday.com/listing/moment/1070,42.8375,112.0,30.0,160
-1071.0,Davis Mills,Houston Texans,QB,RARE,2022-09-11 00:00:00.000,550.0,https://nflallday.com/listing/moment/1071,51.724489795918366,216.0,34.0,98
-1072.0,Jalen Ramsey,Los Angeles Rams,DB,RARE,2022-09-18 00:00:00.000,450.0,https://nflallday.com/listing/moment/1072,79.63963963963964,220.0,50.0,111
-1073.0,Pittsburgh Steelers,Pittsburgh Steelers,Team,RARE,2022-09-11 00:00:00.000,450.0,https://nflallday.com/listing/moment/1073,83.63716814159292,125.0,65.0,113
-1074.0,Lamar Jackson,Baltimore Ravens,QB,LEGENDARY,2022-09-18 00:00:00.000,79.0,https://nflallday.com/listing/moment/1074,1922.6,4469.0,999.0,15
-1075.0,Jacksonville Jaguars,Jacksonville Jaguars,Team,LEGENDARY,2022-09-18 00:00:00.000,79.0,https://nflallday.com/listing/moment/1075,665.0,900.0,575.0,22
-1076.0,Tua Tagovailoa,Miami Dolphins,QB,LEGENDARY,2022-09-18 00:00:00.000,79.0,https://nflallday.com/listing/moment/1076,1065.0,1295.0,899.0,14
-1077.0,Aidan Hutchinson,Detroit Lions,DL,LEGENDARY,2022-09-18 00:00:00.000,99.0,https://nflallday.com/listing/moment/1077,859.0344827586207,999.0,750.0,29
-1078.0,Travon Walker,Jacksonville Jaguars,LB,LEGENDARY,2022-09-11 00:00:00.000,99.0,https://nflallday.com/listing/moment/1078,871.2222222222222,1200.0,769.0,9
-1079.0,New York Jets,New York Jets,Team,LEGENDARY,2022-09-18 00:00:00.000,45.0,https://nflallday.com/listing/moment/1079,848.4545454545455,1148.0,700.0,11
+1038.0,Kyler Murray,Arizona Cardinals,QB,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1038,10.124858757062148,95.0,4.0,1770
+1039.0,Drake London,Atlanta Falcons,WR,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1039,25.358086847073633,750.0,7.0,1589
+1040.0,Kareem Hunt,Cleveland Browns,RB,COMMON,2022-09-11 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1040,9.351047904191617,150.0,4.0,1336
+1041.0,Micah Parsons,Dallas Cowboys,LB,COMMON,2022-09-11 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1041,11.207196029776675,99.0,3.0,1612
+1042.0,Tony Pollard,Dallas Cowboys,RB,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1042,9.993939393939394,200.0,4.0,2310
+1043.0,Allen Robinson II,Los Angeles Rams,WR,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1043,9.032540675844807,100.0,3.0,1598
+1044.0,Garrett Wilson,New York Jets,WR,COMMON,2022-09-18 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1044,21.676450967311542,1000.0,5.0,1499
+1045.0,Geno Smith,Seattle Seahawks,QB,COMMON,2022-09-12 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1045,11.05667701863354,399.0,3.0,2576
+1046.0,Mike Evans,Tampa Bay Buccaneers,WR,COMMON,2022-09-11 00:00:00.000,10000.0,https://nflallday.com/listing/moment/1046,16.182814104758645,613.0,4.0,2921
+1048.0,Derwin James Jr.,Los Angeles Chargers,DB,COMMON,2022-09-15 00:00:00.000,5000.0,https://nflallday.com/listing/moment/1048,13.720958083832336,75.0,5.0,835
+1049.0,Decobie Durant,Los Angeles Rams,DB,COMMON,2022-09-18 00:00:00.000,5000.0,https://nflallday.com/listing/moment/1049,10.21923620933522,60.0,4.0,707
+1050.0,Julian Love,New York Giants,DB,COMMON,2022-09-18 00:00:00.000,5000.0,https://nflallday.com/listing/moment/1050,7.986425339366516,24.0,2.0,663
+1051.0,Sammy Watkins,Green Bay Packers,WR,COMMON,2022-09-18 00:00:00.000,6000.0,https://nflallday.com/listing/moment/1051,8.310068649885583,106.0,5.0,874
+1052.0,Najee Harris,Pittsburgh Steelers,RB,COMMON,2022-09-18 00:00:00.000,6000.0,https://nflallday.com/listing/moment/1052,10.769799366420274,30.0,3.0,947
+1053.0,Sterling Shepard,New York Giants,WR,COMMON,2022-09-11 00:00:00.000,7000.0,https://nflallday.com/listing/moment/1053,7.15875,28.0,4.0,800
+1054.0,Byron Murphy Jr.,Arizona Cardinals,DB,COMMON,2022-09-18 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1054,8.493485342019545,63.0,4.0,614
+1055.0,Cade York,Cleveland Browns,K,COMMON,2022-09-11 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1055,18.54323570432357,500.0,6.0,1434
+1056.0,Cooper Rush,Dallas Cowboys,QB,COMMON,2022-09-18 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1056,15.93135593220339,39.0,3.0,1180
+1057.0,Jaire Alexander,Green Bay Packers,DB,COMMON,2022-09-18 00:00:00.000,4500.0,https://nflallday.com/listing/moment/1057,11.805217391304348,55.0,5.0,1150
+1058.0,Marcus Williams,Baltimore Ravens,DB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1058,39.44092219020173,149.0,25.0,347
+1059.0,Nick Chubb,Cleveland Browns,RB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1059,67.10324483775811,199.0,6.0,339
+1060.0,Amon-Ra St. Brown,Detroit Lions,WR,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1060,66.18548387096774,350.0,35.0,372
+1061.0,James Robinson,Jacksonville Jaguars,RB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1061,43.57709251101321,527.0,24.0,227
+1062.0,Saquon Barkley,New York Giants,RB,RARE,2022-09-11 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1062,93.93630573248407,195.0,60.0,314
+1063.0,Diontae Johnson,Pittsburgh Steelers,WR,RARE,2022-09-11 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1063,48.37971698113208,160.0,26.0,424
+1064.0,Jimmy Garoppolo,San Francisco 49ers,QB,RARE,2022-09-18 00:00:00.000,1199.0,https://nflallday.com/listing/moment/1064,52.36524822695036,150.0,27.0,282
+1065.0,Devin Duvernay,Baltimore Ravens,WR,RARE,2022-09-18 00:00:00.000,799.0,https://nflallday.com/listing/moment/1065,70.52013422818791,425.0,40.0,298
+1066.0,Jaylen Watson,Kansas City Chiefs,DB,RARE,2022-09-15 00:00:00.000,899.0,https://nflallday.com/listing/moment/1066,55.35632183908046,199.0,35.0,261
+1067.0,D.J. Reed,New York Jets,DB,RARE,2022-09-11 00:00:00.000,899.0,https://nflallday.com/listing/moment/1067,36.83882783882784,500.0,23.0,273
+1068.0,Jamel Dean,Tampa Bay Buccaneers,DB,RARE,2022-09-18 00:00:00.000,899.0,https://nflallday.com/listing/moment/1068,53.196,90.0,24.0,500
+1069.0,Jeffery Simmons,Tennessee Titans,DL,RARE,2022-09-11 00:00:00.000,699.0,https://nflallday.com/listing/moment/1069,55.995,980.0,28.0,400
+1070.0,Nelson Agholor,New England Patriots,WR,RARE,2022-09-18 00:00:00.000,999.0,https://nflallday.com/listing/moment/1070,42.52803738317757,315.0,27.0,214
+1071.0,Davis Mills,Houston Texans,QB,RARE,2022-09-11 00:00:00.000,550.0,https://nflallday.com/listing/moment/1071,48.952879581151834,216.0,32.0,191
+1072.0,Jalen Ramsey,Los Angeles Rams,DB,RARE,2022-09-18 00:00:00.000,450.0,https://nflallday.com/listing/moment/1072,76.288,220.0,37.0,125
+1073.0,Pittsburgh Steelers,Pittsburgh Steelers,Team,RARE,2022-09-11 00:00:00.000,450.0,https://nflallday.com/listing/moment/1073,78.48407643312102,125.0,48.0,157
+1074.0,Lamar Jackson,Baltimore Ravens,QB,LEGENDARY,2022-09-18 00:00:00.000,79.0,https://nflallday.com/listing/moment/1074,1721.7272727272727,4469.0,940.0,22
+1075.0,Jacksonville Jaguars,Jacksonville Jaguars,Team,LEGENDARY,2022-09-18 00:00:00.000,79.0,https://nflallday.com/listing/moment/1075,653.4347826086956,900.0,399.0,23
+1076.0,Tua Tagovailoa,Miami Dolphins,QB,LEGENDARY,2022-09-18 00:00:00.000,79.0,https://nflallday.com/listing/moment/1076,991.55,1295.0,749.0,20
+1077.0,Aidan Hutchinson,Detroit Lions,DL,LEGENDARY,2022-09-18 00:00:00.000,99.0,https://nflallday.com/listing/moment/1077,841.84375,999.0,600.0,32
+1078.0,Travon Walker,Jacksonville Jaguars,LB,LEGENDARY,2022-09-11 00:00:00.000,99.0,https://nflallday.com/listing/moment/1078,837.1,1200.0,530.0,10
+1079.0,New York Jets,New York Jets,Team,LEGENDARY,2022-09-18 00:00:00.000,45.0,https://nflallday.com/listing/moment/1079,801.5714285714286,1148.0,620.0,14

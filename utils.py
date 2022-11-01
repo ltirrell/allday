@@ -2,8 +2,10 @@ import json
 from urllib.request import urlopen
 
 import altair as alt
+from bs4 import BeautifulSoup
 import numpy as np
 import pandas as pd
+import requests
 import streamlit as st
 from PIL import Image, ImageDraw
 from scipy.stats import ttest_ind, ttest_rel
@@ -63,7 +65,8 @@ __all__ = [
     "load_pack_samples",
     "get_avg_pack_metrics",
     "load_player_mint",
-    "load_simulation"
+    "load_simulation",
+    "get_player_name",
 ]
 
 cols_to_keep = [
@@ -145,6 +148,9 @@ main_date_ranges = [
     "2022 Week 3",
     "2022 Week 4",
     "2022 Week 5",
+    "2022 Week 6",
+    "2022 Week 7",
+    "2022 Week 8",
 ]
 play_v_player_date_ranges = [
     "All dates",
@@ -154,6 +160,9 @@ play_v_player_date_ranges = [
     "Since 2022 Week 3",
     "Since 2022 Week 4",
     "Since 2022 Week 5",
+    "Since 2022 Week 6",
+    "Since 2022 Week 7",
+    "Since 2022 Week 8",
 ]
 stats_date_ranges = [
     "2022 Full Season",
@@ -162,6 +171,9 @@ stats_date_ranges = [
     "2022 Week 3",
     "2022 Week 4",
     "2022 Week 5",
+    "2022 Week 6",
+    "2022 Week 7",
+    "2022 Week 8",
 ]
 
 position_type_dict = {
@@ -216,8 +228,22 @@ stats_subset = [
 ]
 
 player_mapping = {
-    "Patrick Mahomes": "Patrick Mahomes II",
-    "Gabe Davis	": "Gabriel Davis",
+    "Jakeem Grant Sr.": "Jakeem Grant",
+    "Gardner Minshew II": "Gardner Minshew",
+    "Cedrick Wilson Jr.": "Cedrick Wilson",
+    "Michael Pittman Jr.": "Michael Pittman",
+    "Odell Beckham Jr.": "Odell Beckham",
+    "AJ Dillon": "A.J. Dillon",
+    "Marvin Jones Jr.": "Marvin Jones",
+    "Steve Smith Sr.": "Steve Smith",
+    "Allen Robinson II": "Allen Robinson",
+    "Laviska Shenault Jr.": "Laviska Shenault",
+    "Gabriel Davis": "Gabe Davis",
+    "Scotty Miller": "Scott Miller",
+    "Patrick Mahomes II": "Patrick Mahomes",
+    "DJ Chark Jr.": "D.J. Chark",
+    "DJ Moore": "D.J. Moore",
+    "Melvin Gordon III": "Melvin Gordon",
 }
 
 week_timings = {
@@ -226,6 +252,9 @@ week_timings = {
     3: ("2022-09-22", "2022-09-29"),
     4: ("2022-09-29", "2022-10-06"),
     5: ("2022-10-06", "2022-10-13"),
+    6: ("2022-10-13", "2022-10-20"),
+    7: ("2022-10-20", "2022-10-27"),
+    8: ("2022-10-27", "2022-11-03"),
 }
 
 game_timings = {
@@ -347,6 +376,72 @@ game_timings = {
             pd.Timestamp("2022-10-10 23:00:00-0400", tz="US/Eastern"),
         ),
     },
+    6: {  # #TODO: update for all challenges
+        "thursday": (
+            pd.Timestamp("2022-10-13 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-13 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "slate": (
+            pd.Timestamp("2022-10-16 09:30:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-16 19:30:00-0400", tz="US/Eastern"),
+        ),
+        "sunday_night": (
+            pd.Timestamp("2022-10-16 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-16 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "monday": (
+            pd.Timestamp("2022-10-17 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-17 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "weekly": (
+            pd.Timestamp("2022-10-13 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-17 23:00:00-0400", tz="US/Eastern"),
+        ),
+    },
+    7: {  # #TODO: update for all challenges
+        "thursday": (
+            pd.Timestamp("2022-10-20 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-20 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "slate": (
+            pd.Timestamp("2022-10-23 09:30:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-23 19:30:00-0400", tz="US/Eastern"),
+        ),
+        "sunday_night": (
+            pd.Timestamp("2022-10-23 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-23 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "monday": (
+            pd.Timestamp("2022-10-24 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-24 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "weekly": (
+            pd.Timestamp("2022-10-20 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-24 23:00:00-0400", tz="US/Eastern"),
+        ),
+    },
+    8: {  # #TODO: update for all challenges
+        "thursday": (
+            pd.Timestamp("2022-10-27 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-27 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "slate": (
+            pd.Timestamp("2022-10-30 09:30:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-30 19:30:00-0400", tz="US/Eastern"),
+        ),
+        "sunday_night": (
+            pd.Timestamp("2022-10-30 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-30 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "monday": (
+            pd.Timestamp("2022-10-31 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-31 23:00:00-0400", tz="US/Eastern"),
+        ),
+        "weekly": (
+            pd.Timestamp("2022-10-27 20:15:00-0400", tz="US/Eastern"),
+            pd.Timestamp("2022-10-31 23:00:00-0400", tz="US/Eastern"),
+        ),
+    },
 }
 
 pack_date_ranges = [
@@ -361,6 +456,7 @@ pack_date_ranges = [
     ("2022-03-11 06:00", "2022-03-11 23:59"),
     ("2022-09-27 06:00", "2022-09-27 23:59"),
     ("2022-10-11 06:00", "2022-10-11 23:59"),
+    # #TODO need to update
 ]
 
 player_pack_cols = [
@@ -1339,6 +1435,7 @@ def get_avg_pack_metrics(data):
         vals["Count"][tier] = df.Count.mean()
     return vals
 
+
 @st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
 def load_player_mint(date):
     df = pd.read_csv(
@@ -1351,6 +1448,48 @@ def load_player_mint(date):
         df[x] = pd.to_datetime(df[x]).dt.tz_convert("US/Eastern")
 
     return df
+
+
 @st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
 def load_simulation():
     return pd.read_csv("data/simulation.csv")
+
+
+# #TODO: figure this out, maybe as easter egg?
+def load_players():
+    return pd.read_csv("data/players.csv")
+
+
+def get_random_player():
+    r = requests.get("http://bflfootball.com/Player.aspx")
+    html = r.text
+    parsed_html = BeautifulSoup(html)
+    data = []
+
+    rows = parsed_html.find_all("tr")
+    for row in rows:
+        cols = row.find_all("td")
+        cols = [ele.text.strip() for ele in cols]
+        cols = [ele for ele in cols if ele]
+        data.append(cols)  # Get rid of empty values
+
+    player_dict = {}
+    for x in data:
+        if "Name:" in x:
+            player_dict["Name"] = x[-1]
+    return player_dict
+
+
+def get_player_name():
+    if np.random.randint(0, 2):
+        players = load_players()
+        player_name = players.iloc[np.random.randint(0, len(players))].values[0]
+        real = True
+    else:
+        player_info = get_random_player()
+        player_name = player_info["Name"]
+        real = False
+    return player_name, real
+
+
+# ---

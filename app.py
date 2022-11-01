@@ -83,13 +83,31 @@ tab6, tab5, tab4, tab3, tab2, tab1 = st.tabs(
 
 with tab6:
     st.header("Predictions")
+    
+    # # name_button = st.button("Generate player", key="gen_player")
+    # # if name_button:
+    # name, real = get_player_name()
+    # st.session_state.player = name    
+    # st.write(name)
+    # st.subheader("Is this a real player?")
+    # guess = st.radio("Is this player real?",["Not Sure","Yes", "No"], horizontal=True,key="radio_guess")
+    # # c1, c2 = st.columns(2)
+    # # yes_button = c1.button("Yes",key='yes_button')
+    # # no_button = c2.button("No",key='no_button')
+    # if guess=="Yes" and real:
+    #     st.write("Player is real, good job!")
+    # if guess=="Yes" and not real:
+    #     st.write("This is actually a real player")
+    # if guess=="No" and real:
+    #     st.write("This is actually a real player")
+    # if guess=="No" and not real:
+    #     st.write("This is randomly generated player, good job!")
 
 
     
 
 with tab5:
     st.header("Packs")
-
     st.write(
         f"""
     Packs are the way users mint new NFL All Day Moments.
@@ -100,6 +118,7 @@ with tab5:
     Special thanks to Twitter user [@DiamondNFLAD](https://twitter.com/DiamondNFLAD) for consolidating this information!
     """
     )
+    st.subheader("NOTE: This section has not been updated and may be out of date!")
     if st.checkbox("Load Section?", key="load_tab5"):
         st.subheader("Pack Info")
         with st.expander("Pack Info"):
@@ -682,6 +701,7 @@ with tab4:
         Below is a timeline of the start and end of challenges. `Ctrl-Click` a point to view NFL All Day page for the challenge, or explore more in the next section.
         """
     )
+    st.subheader("NOTE: This section has not been updated and may be out of date!")
     if st.checkbox("Load Section?", key="load_tab4"):
         challenges = load_challenge_data()
         chart = (
@@ -1581,6 +1601,14 @@ with tab2:
             stats_df = weekly_df_2022[weekly_df_2022.week == 3]
         elif date_range == "2022 Week 4":
             stats_df = weekly_df_2022[weekly_df_2022.week == 4]
+        elif date_range == "2022 Week 5":
+            stats_df = weekly_df_2022[weekly_df_2022.week == 5]
+        elif date_range == "2022 Week 6":
+            stats_df = weekly_df_2022[weekly_df_2022.week == 6]
+        elif date_range == "2022 Week 7":
+            stats_df = weekly_df_2022[weekly_df_2022.week == 7]
+        elif date_range == "2022 Week 8":
+            stats_df = weekly_df_2022[weekly_df_2022.week == 8]
 
         if position == "All":
             stats_df = stats_df.sort_values(by=metric, ascending=False).reset_index(

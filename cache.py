@@ -30,6 +30,15 @@ def get_score_data(score_data, date_range):
     elif date_range == "2022 Week 5":
         start, end = week_timings[5]
         df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
+    elif date_range == "2022 Week 6":
+        start, end = week_timings[6]
+        df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
+    elif date_range == "2022 Week 7":
+        start, end = week_timings[7]
+        df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
+    elif date_range == "2022 Week 8":
+        start, end = week_timings[8]
+        df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
 
     grouped = df.groupby(["marketplace_id"]).agg(agg_dict).reset_index()
     grouped["Week"] = grouped.Week.astype(str)
@@ -68,6 +77,15 @@ def get_player_data(main_data, date_range, agg_metric):
     elif date_range == "2022 Week 5":
         start, end = week_timings[5]
         df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
+    elif date_range == "2022 Week 6":
+        start, end = week_timings[6]
+        df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
+    elif date_range == "2022 Week 7":
+        start, end = week_timings[7]
+        df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
+    elif date_range == "2022 Week 8":
+        start, end = week_timings[8]
+        df = score_data[(score_data.Date >= start) & (score_data.Date < end)]
 
     grouped = (
         df.groupby(["Date", "Player", "Position", "Team"])
@@ -103,6 +121,15 @@ def get_play_v_player_data(main_data, date_range):
         df = main_data[main_data.Date >= start]
     elif date_range == "Since 2022 Week 5":
         start = week_timings[5][0]
+        df = main_data[main_data.Date >= start]
+    elif date_range == "Since 2022 Week 6":
+        start = week_timings[6][0]
+        df = main_data[main_data.Date >= start]
+    elif date_range == "Since 2022 Week 7":
+        start = week_timings[7][0]
+        df = main_data[main_data.Date >= start]
+    elif date_range == "Since 2022 Week 8":
+        start = week_timings[8][0]
         df = main_data[main_data.Date >= start]
     else:
         df = main_data
@@ -169,6 +196,15 @@ def get_pack_data(grouped_pack, date_range_choice, date_range):
             df = grouped_pack[grouped_pack["Datetime_Pack"] >= start]
         elif date_range == "Since 2022 Week 5":
             start = week_timings[5][0]
+            df = grouped_pack[grouped_pack["Datetime_Pack"] >= start]
+        elif date_range == "Since 2022 Week 6":
+            start = week_timings[6][0]
+            df = grouped_pack[grouped_pack["Datetime_Pack"] >= start]
+        elif date_range == "Since 2022 Week 7":
+            start = week_timings[7][0]
+            df = grouped_pack[grouped_pack["Datetime_Pack"] >= start]
+        elif date_range == "Since 2022 Week 8":
+            start = week_timings[8][0]
             df = grouped_pack[grouped_pack["Datetime_Pack"] >= start]
         else:
             df = grouped_pack
