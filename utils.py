@@ -3,7 +3,7 @@ from urllib.request import urlopen
 from pathlib import Path
 
 import altair as alt
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 import numpy as np
 import pandas as pd
 import requests
@@ -68,7 +68,7 @@ __all__ = [
     "get_avg_pack_metrics",
     "load_player_mint",
     "load_simulation",
-    "get_player_name",
+    # "get_player_name",
     "xgb_feature_names",
     "load_by_marketplace_id",
     "load_by_playername",
@@ -2070,40 +2070,40 @@ def load_simulation():
 
 
 # #TODO: figure this out, maybe as easter egg?
-def load_players():
-    return pd.read_csv("data/players.csv")
+# def load_players():
+#     return pd.read_csv("data/players.csv")
 
 
-def get_random_player():
-    r = requests.get("http://bflfootball.com/Player.aspx")
-    html = r.text
-    parsed_html = BeautifulSoup(html)
-    data = []
+# def get_random_player():
+#     r = requests.get("http://bflfootball.com/Player.aspx")
+#     html = r.text
+#     parsed_html = BeautifulSoup(html)
+#     data = []
 
-    rows = parsed_html.find_all("tr")
-    for row in rows:
-        cols = row.find_all("td")
-        cols = [ele.text.strip() for ele in cols]
-        cols = [ele for ele in cols if ele]
-        data.append(cols)  # Get rid of empty values
+#     rows = parsed_html.find_all("tr")
+#     for row in rows:
+#         cols = row.find_all("td")
+#         cols = [ele.text.strip() for ele in cols]
+#         cols = [ele for ele in cols if ele]
+#         data.append(cols)  # Get rid of empty values
 
-    player_dict = {}
-    for x in data:
-        if "Name:" in x:
-            player_dict["Name"] = x[-1]
-    return player_dict
+#     player_dict = {}
+#     for x in data:
+#         if "Name:" in x:
+#             player_dict["Name"] = x[-1]
+#     return player_dict
 
 
-def get_player_name():
-    if np.random.randint(0, 2):
-        players = load_players()
-        player_name = players.iloc[np.random.randint(0, len(players))].values[0]
-        real = True
-    else:
-        player_info = get_random_player()
-        player_name = player_info["Name"]
-        real = False
-    return player_name, real
+# def get_player_name():
+#     if np.random.randint(0, 2):
+#         players = load_players()
+#         player_name = players.iloc[np.random.randint(0, len(players))].values[0]
+#         real = True
+#     else:
+#         player_info = get_random_player()
+#         player_name = player_info["Name"]
+#         real = False
+#     return player_name, real
 
 
 # ---
@@ -2115,7 +2115,7 @@ def load_by_playername(player):
     return df
 
 
-@st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
+@st.experimental_memo(ttl=3600, suppress_st_warning=True)
 def load_by_marketplace_id(data_file):
     # data = Path("data/ml")
     # data_file = list(data.glob(f"{marketplace_id}*"))[0]

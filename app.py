@@ -140,6 +140,7 @@ with tab6:
     #     ],
     #     axis=1,
     # )
+    data
     data["Difference"] = data["Price"] - data["Predicted Price"]
     data["Percent Difference"] = data["Difference"] / data["Price"]
     data["Moment Rarity"] = data.Rarity.apply(lambda x: rarity_map[round(x)].title())
