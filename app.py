@@ -126,24 +126,26 @@ with tab6:
     )
 
     data = load_by_marketplace_id(nft)
-    X, y, scaler, numeric_feats = get_xgb_data(data)
-    scaled_df = rescale_xgb(X, y, scaler, numeric_feats)
-    xgb_model = load("xgbmodel.joblib")
-    prediction = xgb_model.predict(X)
-    prediction_df = pd.DataFrame(np.expm1(prediction), columns=["Predicted Price"])
-    data = pd.concat(
-        [
-            data[["player_display_name", "site", "season", "week", "Position", "Team"]],
-            scaled_df,
-            prediction_df,
-        ],
-        axis=1,
-    )
+    # #NOTE: had to recreate the date files, due to scaling of the training data causing issues when predicting
+    # X, y, scaler, numeric_feats = get_xgb_data(data)
+    # scaled_df = rescale_xgb(X, y, scaler, numeric_feats)
+    # xgb_model = load("xgbmodel.joblib")
+    # prediction = xgb_model.predict(X)
+    # prediction_df = pd.DataFrame(np.expm1(prediction), columns=["Predicted Price"])
+    # data = pd.concat(
+    #     [
+    #         data[["player_display_name", "site", "season", "week", "Position", "Team"]],
+    #         scaled_df,
+    #         prediction_df,
+    #     ],
+    #     axis=1,
+    # )
     data["Difference"] = data["Price"] - data["Predicted Price"]
     data["Percent Difference"] = data["Difference"] / data["Price"]
     data["Moment Rarity"] = data.Rarity.apply(lambda x: rarity_map[round(x)].title())
-
-    mape = mean_absolute_percentage_error(np.expm1(y), np.expm1(prediction))
+    y = data["Price"]
+    prediction = data["Predicted Price"]
+    mape = mean_absolute_percentage_error(y, prediction)
     corr = spearmanr(y, prediction)
 
     c2.metric("Mean Absolute Percent Error", f"{mape:.2%}")
@@ -152,7 +154,7 @@ with tab6:
         f"{corr.correlation:.2f} ({'No signifcance' if corr.pvalue > 0.05 else 'Signifcantly correlated'})",
     )
 
-    chart = (
+    scatter = (
         alt.Chart(
             data[
                 [
@@ -169,7 +171,7 @@ with tab6:
             ],
             title=nft.replace(".csv.gzip", "").replace("_", " ").replace("--", ": "),
         )
-        .mark_circle(size=69)
+        .mark_circle(size=80)
         .encode(
             x=alt.X(
                 "Price", title="Real Price", scale=alt.Scale(zero=False, nice=False)
@@ -197,7 +199,40 @@ with tab6:
         .interactive()
         .properties(height=800)
     )
+    xrange = [data["Price"].min(), data["Price"].max()]
+    yrange = [data["Predicted Price"].min(), data["Predicted Price"].max()]
+    line = (
+        alt.Chart(
+            pd.DataFrame(
+                {
+                    "Price": np.linspace(
+                        min(data["Price"].min(), data["Predicted Price"].min()),
+                        max(data["Price"].max(), data["Predicted Price"].max()),
+                        500,
+                    ),
+                    "Predicted Price": np.linspace(
+                        min(data["Price"].min(), data["Predicted Price"].min()),
+                        max(data["Price"].max(), data["Predicted Price"].max()),
+                        500,
+                    ),
+                }
+            )
+        )
+        .mark_line(color="gray",size=3, strokeDash=[16,8], opacity=.5)
+        .encode(
+            x=alt.X("Price", scale=alt.Scale(domain=xrange)),
+            y=alt.Y("Predicted Price", scale=alt.Scale(domain=yrange)),
+            tooltip=[
+                alt.Tooltip("Price", title="Real Price (equal prices)", format=",.2f"),
+                alt.Tooltip("Predicted Price", title="Predicted Price (equal prices)", format=",.2f"),
+            ],
+        )
+    )
+
+    chart = scatter + line
+
     st.altair_chart(chart, use_container_width=True)
+
     with st.expander("View and Download Data Table"):
         st.write(data)
         st.download_button(
