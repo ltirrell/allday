@@ -1,6 +1,7 @@
 altair
-beautifulsoup4
+# beautifulsoup4
 jinja2
+joblib==1.2.0
 matplotlib
 nfl_data_py
 numpy
@@ -8,10 +9,10 @@ pandas
 Pillow
 plotly
 requests
-scikit-learn
+scikit-learn==1.1.2
 scipy
 shroomdk
 # sqlalchemy
 statsmodels
 streamlit
-xgboost
+xgboost==1.6.2
