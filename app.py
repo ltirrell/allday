@@ -1,8 +1,17 @@
+from pathlib import Path
 import altair as alt
+import numpy as np
 import pandas as pd
 import streamlit as st
 from PIL import Image
-from scipy.stats import ttest_ind, ttest_rel
+from scipy.stats import ttest_ind, ttest_rel, spearmanr
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
+    mean_absolute_percentage_error,
+)
+from joblib import load
 
 from utils import *
 
@@ -83,28 +92,301 @@ tab6, tab5, tab4, tab3, tab2, tab1 = st.tabs(
 
 with tab6:
     st.header("Predictions")
-    
-    # # name_button = st.button("Generate player", key="gen_player")
-    # # if name_button:
-    # name, real = get_player_name()
-    # st.session_state.player = name    
-    # st.write(name)
-    # st.subheader("Is this a real player?")
-    # guess = st.radio("Is this player real?",["Not Sure","Yes", "No"], horizontal=True,key="radio_guess")
-    # # c1, c2 = st.columns(2)
-    # # yes_button = c1.button("Yes",key='yes_button')
-    # # no_button = c2.button("No",key='no_button')
-    # if guess=="Yes" and real:
-    #     st.write("Player is real, good job!")
-    # if guess=="Yes" and not real:
-    #     st.write("This is actually a real player")
-    # if guess=="No" and real:
-    #     st.write("This is actually a real player")
-    # if guess=="No" and not real:
-    #     st.write("This is randomly generated player, good job!")
+    st.write(
+        """
+    Building off our previous work (see **Player or Play Types?**), we built an XGBoost model to predict the price of a Moment based on NFT metadata, sales information and stats of the Player.
+
+    Initial efforts our shown below. The model performs reasonably well (mean absolute percent error of **35.39%**), though definitely could use further work for improvements.
+    See the (raw) notebook with code used to build the model [here](https://github.com/ltirrell/allday/blob/final/price_prediction.ipynb).
+
+    Note that this model only shows predictions for offensive players (QB, WR, RB and TE) for Moments htat occurred after 1999-- this is a limitation of the NFL statistical databases used to gather player stats.
+
+    Future work will also take into account sales data as games are occurring, and estimates of floor prices.
+    """
+    )
+
+    st.subheader("Prices vs Predicted")
+    st.write(
+        """
+    The scatterplot below shows the Real vs Predicted Price for each sale.
+
+    """
+    )
+
+    c1, c2, c3 = st.columns(3)
+    nft = c1.selectbox(
+        "Choose an NFT",
+        marketplace_id,
+        139,
+        # np.random.randint(0, len(marketplace_id)),
+        format_func=lambda x: x.replace(".csv.gzip", "")
+        .replace("_", " ")
+        .replace("--", ": "),
+        key="data_file",
+    )
+
+    data = load_by_marketplace_id(nft)
+    X, y, scaler, numeric_feats = get_xgb_data(data)
+    scaled_df = rescale_xgb(X, y, scaler, numeric_feats)
+    xgb_model = load("xgbmodel.joblib")
+    prediction = xgb_model.predict(X)
+    prediction_df = pd.DataFrame(np.expm1(prediction), columns=["Predicted Price"])
+    data = pd.concat(
+        [
+            data[["player_display_name", "site", "season", "week", "Position", "Team"]],
+            scaled_df,
+            prediction_df,
+        ],
+        axis=1,
+    )
+    data["Difference"] = data["Price"] - data["Predicted Price"]
+    data["Percent Difference"] = data["Difference"] / data["Price"]
+    data["Moment Rarity"] = data.Rarity.apply(lambda x: rarity_map[round(x)].title())
+
+    mape = mean_absolute_percentage_error(np.expm1(y), np.expm1(prediction))
+    corr = spearmanr(y, prediction)
+
+    c2.metric("Mean Absolute Percent Error", f"{mape:.2%}")
+    c3.metric(
+        "Correlation",
+        f"{corr.correlation:.2f} ({'No signifcance' if corr.pvalue > 0.05 else 'Signifcantly correlated'})",
+    )
+
+    chart = (
+        alt.Chart(
+            data[
+                [
+                    "player_display_name",
+                    "Team",
+                    "Position",
+                    "site",
+                    "Price",
+                    "Predicted Price",
+                    "Moment Rarity",
+                    "Percent Difference",
+                    "Difference",
+                ]
+            ],
+            title=nft.replace(".csv.gzip", "").replace("_", " ").replace("--", ": "),
+        )
+        .mark_circle(size=69)
+        .encode(
+            x=alt.X(
+                "Price", title="Real Price", scale=alt.Scale(zero=False, nice=False)
+            ),
+            y=alt.Y("Predicted Price", scale=alt.Scale(zero=False, nice=False)),
+            color=alt.Color(
+                "Moment Rarity",
+                scale=alt.Scale(
+                    domain=["Common", "Rare", "Legendary", "Ultimate"],
+                    range=["#1E88E5", "#D81B60", "#FFC107", "#004D40"],
+                ),
+            ),
+            tooltip=[
+                alt.Tooltip("player_display_name", title="Player"),
+                alt.Tooltip("Position"),
+                alt.Tooltip("Team"),
+                alt.Tooltip("Moment Rarity"),
+                alt.Tooltip("Price", title="Real Price", format=",.2f"),
+                alt.Tooltip("Predicted Price", format=",.2f"),
+                alt.Tooltip("Difference", format=",.2f"),
+                alt.Tooltip("Percent Difference", format=".2%"),
+            ],
+            href="site",
+        )
+        .interactive()
+        .properties(height=800)
+    )
+    st.altair_chart(chart, use_container_width=True)
+    with st.expander("View and Download Data Table"):
+        st.write(data)
+        st.download_button(
+            "Click to Download",
+            data.to_csv(index=False).encode("utf-8"),
+            f"{nft.replace('.csv.gzip','.csv')}",
+            "text/csv",
+            key="download-scatterplot",
+        )
+
+    st.subheader("Model Details")
+    c1, c2 = st.columns([2, 1])
+    image = Image.open("images/ml/shap_summary.png")
+    baseheight = 800
+    hpercent = baseheight / float(image.size[1])
+    wsize = int((float(image.size[0]) * float(hpercent)))
+    image = image.resize((wsize, baseheight), Image.Resampling.LANCZOS)
+
+    c1.image(
+        image,
+        use_column_width="auto",
+        caption="Summary of effects features have in determining price",
+    )
+    c2.write(
+        """
+        Through an iterative process, 73 features  were used in price prediction.
+        Moment Rarity had the most effect in determining price, followed closely by the Sales Count (total number of times moments with the same marketplace ID were sold).
+        Additionally, Resell Number (the running tally for number of times a specific marketplace ID NFT was sold) was also high up in importance
+
+        Three types of statistics were used in this analysis:
+        - Player's stats for the game where the Moment took place
+        - Player's average season stats, for the season the Moment occured (names end in `_season`)
+        - Player's average career stats (names end in `_career`)
+
+        Fantasy points were important in the model's prediction, as this takes into account various statistics related to scoring.
+        """
+    )
+    st.subheader("Price compared to various features")
+    image_path = Path("images/ml")
+    comparison_images = list(image_path.glob("price_v_*.jpg"))
+    st.write(
+        "A pairwise plot of the top features shown here, while individual plots of Price vs a specific feature can be selected below."
+    )
+
+    image = Image.open(str(image_path / "pairplot.png"))
+    st.image(
+        image,
+        use_column_width="auto",
+    )
+
+    img = st.selectbox(
+        "Choose a comparison",
+        comparison_images,
+        format_func=lambda x: x.name.replace(".jpg", "").replace("_", " ").title(),
+    )
+    image = Image.open(img)
+    st.image(image, use_column_width="auto")
+
+    st.header("Future work")
+    st.write(
+        """
+        This model is a first pass at using NFL stats to predict a Moment's Price.
+
+        Future work will seek to improve this model for floor price prediction, and NFTs whose price may be on the rise (such as for players following a break out game or after being traded).
+
+        Additonally, game play has a real-time effect on prices- if a player does well in a game, their Moments will have increased sales. Information about when games occur could be incorporated to show this.
+
+        Finally, the model hasn't been improved as much as it can be.
+        Hyperparameters haven't been tuned, using mostly default values.
+        There are also many features included that mostly just effect one position (such as passing TDs almost exclusively occuring for quaterbacks).
+        These could be combined into a smaller set of features which may improve performace (such as a "primary touchdown" field, which would be passing TDs for QBs and rushing TDs for RBs).
+        Because many of these have "NaN" values, there are a limited number of machine learning models which can be used.
+        With cleanup of NaNs from important features, ensemble methods of stacking and blending different models could lead to improved and more robust results.
+        """
+    )
+    # select = alt.selection_single(on="mouseover")
+    # base = alt.Chart(grouped)
+    # chart = (
+    #     base.mark_point(size=110, filled=True)
+    #     .encode(
+    #         x=alt.X(
+    #             "jitter:Q",
+    #             title=None,
+    #             axis=alt.Axis(values=[0], ticks=True, grid=False, labels=False),
+    #             scale=alt.Scale(),
+    #         ),
+    #         y=alt.Y(
+    #             "Price" if agg_metric == "Average Sales Price ($)" else "tx_id",
+    #             title=agg_metric,
+    #             scale=alt.Scale(
+    #                 type="log",
+    #                 zero=False,
+    #             ),
+    #         ),
+    #         color=alt.Color(
+    #             "Game Outcome" if metric == "Game Outcome" else "Scored Touchdown?",
+    #             scale=alt.Scale(
+    #                 domain=["Win", "Loss", "Tie"]
+    #                 if metric == "Game Outcome"
+    #                 else [True, False, None],
+    #                 range=["#1E88E5", "#D81B60", "#FFC107"],
+    #             ),
+    #         ),
+    #         shape=alt.value("circle")
+    #         if metric != "Both"
+    #         else alt.Shape(
+    #             "Game Outcome",
+    #             scale=alt.Scale(
+    #                 domain=["Win", "Loss", "Tie"],
+    #                 range=["circle", "triangle", "diamond"],
+    #             ),
+    #         ),
+    #         opacity=alt.condition(select, alt.value(1), alt.value(0.3)),
+    #         tooltip=[
+    #             # alt.Tooltip("yearmonthdate(Date)", title="Date"),
+    #             alt.Tooltip("Player"),
+    #             alt.Tooltip("Position"),
+    #             alt.Tooltip("Team"),
+    #             alt.Tooltip("yearmonthdate(Moment_Date)", title="Game Date"),
+    #             alt.Tooltip("Moment_Tier", title="Rarity"),
+    #             alt.Tooltip("Total_Circulation", title="NFT Total Supply"),
+    #             # alt.Tooltip("Moment_Description", title="Description", band=1),
+    #             alt.Tooltip("Game Outcome"),
+    #             alt.Tooltip("Scored Touchdown?"),
+    #             alt.Tooltip("Price", title="Average Sales Price ($)", format=".2f"),
+    #             alt.Tooltip(
+    #                 "tx_id",
+    #                 title="Sales count",
+    #             ),
+    #         ],
+    #         href="site",
+    #     )
+    #     .transform_calculate(
+    #         # Generate Gaussian jitter with a Box-Muller transform
+    #         jitter="sqrt(-2*log(random()))*cos(2*PI*random())"
+    #     )
+    #     .interactive()
+    #     .properties(height=800, width=125)
+    #     .add_selection(select)
+    # )
+
+    # box = base.mark_boxplot(color="#004D40", outliers=False, size=25).encode(
+    #     y=alt.Y(
+    #         "Price" if agg_metric == "Average Sales Price ($)" else "tx_id",
+    #         title=agg_metric,
+    #     ),
+    # )
+    # combined_chart = (
+    #     alt.layer(box, chart)
+    #     .facet(
+    #         column=alt.Column(
+    #             position_type_dict[position_type][0],
+    #             title=None,
+    #             header=alt.Header(
+    #                 labelAngle=-90,
+    #                 titleOrient="top",
+    #                 labelOrient="bottom",
+    #                 labelAlign="right",
+    #                 labelPadding=3,
+    #             ),
+    #             sort=position_type_dict[position_type][1],
+    #         ),
+    #         title=f"Play Types: {play_type}",
+    #     )
+    #     .configure_facet(spacing=0)
+    # )
+
+    # st.altair_chart(combined_chart)
 
 
-    
+# # name_button = st.button("Generate player", key="gen_player")
+# # if name_button:
+# name, real = get_player_name()
+# st.session_state.player = name
+# st.write(name)
+# st.subheader("Is this a real player?")
+# guess = st.radio("Is this player real?",["Not Sure","Yes", "No"], horizontal=True,key="radio_guess")
+# # c1, c2 = st.columns(2)
+# # yes_button = c1.button("Yes",key='yes_button')
+# # no_button = c2.button("No",key='no_button')
+# if guess=="Yes" and real:
+#     st.write("Player is real, good job!")
+# if guess=="Yes" and not real:
+#     st.write("This is actually a real player")
+# if guess=="No" and real:
+#     st.write("This is actually a real player")
+# if guess=="No" and not real:
+#     st.write("This is randomly generated player, good job!")
+
 
 with tab5:
     st.header("Packs")
@@ -187,18 +469,24 @@ with tab5:
                 df[df["Pack Type"] == "Premium"]["Datetime_Pack"].max()
                 - df[df["Pack Type"] == "Premium"]["Datetime_Pack"].min()
             )
-        standard_avg_sales_per_min = df[df["Pack Type"] == "Standard"]["Sales_Count"].mean()
-        premium_avg_sales_per_min = df[df["Pack Type"] == "Premium"]["Sales_Count"].mean()
+        standard_avg_sales_per_min = df[df["Pack Type"] == "Standard"][
+            "Sales_Count"
+        ].mean()
+        premium_avg_sales_per_min = df[df["Pack Type"] == "Premium"][
+            "Sales_Count"
+        ].mean()
         standard_total_sales = df[df["Pack Type"] == "Standard"]["Sales_Count"].sum()
         premium_total_sales = df[df["Pack Type"] == "Premium"]["Sales_Count"].sum()
         # ---
         st.write("---")
         c1, c2 = st.columns([1, 3])
         c1.metric(
-            "Average Sales per minute, Standard Packs", f"{standard_avg_sales_per_min:.2f}"
+            "Average Sales per minute, Standard Packs",
+            f"{standard_avg_sales_per_min:.2f}",
         )
         c1.metric(
-            "Average Sales per minute, Premium Packs", f"{premium_avg_sales_per_min:.2f}"
+            "Average Sales per minute, Premium Packs",
+            f"{premium_avg_sales_per_min:.2f}",
         )
         c1.write("---")
         c1.metric("Total Sales, Standard Packs", f"{standard_total_sales:,.0f}")
@@ -227,7 +515,10 @@ with tab5:
             key="select_player_mint_daterange",
         )
         pack_metric = c2.radio(
-            "Choose a metric", ["Price", "Count"], key="player_mint_metric", horizontal=True
+            "Choose a metric",
+            ["Price", "Count"],
+            key="player_mint_metric",
+            horizontal=True,
         )
         date = date_range[0].split(" ")[0]
         player_mint = load_player_mint(date)
@@ -264,7 +555,8 @@ with tab5:
         chart = (
             alt.Chart(
                 grouped_by_hour[
-                    (grouped_by_hour.player_not_moment) | (grouped_by_hour.player_moment)
+                    (grouped_by_hour.player_not_moment)
+                    | (grouped_by_hour.player_moment)
                 ],
                 title="Players in current Pack Drop",
             )
@@ -537,7 +829,9 @@ with tab5:
                     x=alt.X("Player", sort="-y", title=None),
                     y=alt.Y(
                         pack_metric,
-                        title="Mean Price ($)" if pack_metric == "Price" else "Sales Count",
+                        title="Mean Price ($)"
+                        if pack_metric == "Price"
+                        else "Sales Count",
                         scale=alt.Scale(type="log"),
                         stack=None,
                     ),
@@ -575,8 +869,12 @@ with tab5:
 
         st.subheader("Try your luck at minting a pack!")
         simulation = load_simulation()
-        info = simulation.groupby('Pack Type').agg(mean=('Price', 'mean'), median=('Price', 'median')).reset_index()
-        
+        info = (
+            simulation.groupby("Pack Type")
+            .agg(mean=("Price", "mean"), median=("Price", "median"))
+            .reset_index()
+        )
+
         c1, c2 = st.columns(2)
         c1.write(
             f"""
@@ -590,7 +888,6 @@ with tab5:
             - For Premium packs, the mean value is \${info[info['Pack Type']=='Premium']['mean'].values[0]:.2f} (median value is \${info[info['Pack Type']=='Premium']['median'].values[0]:.2f}). {simulation[simulation['Pack Type']=='Premium'][simulation.Price > 219].Price.count() / len(simulation[simulation['Pack Type']=='Premium']):.2%} of the time, the value is more than the $219 price.
             """
         )
-        
 
         chart = (
             alt.Chart(simulation)
@@ -625,8 +922,7 @@ with tab5:
         )
         c2.altair_chart(chart + rules)
 
-
-        st.write('---')
+        st.write("---")
         cols = st.columns(5)
         pack_choice = cols[0].radio(
             "Which pack type?",
