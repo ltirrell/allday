@@ -2115,7 +2115,7 @@ def load_by_playername(player):
     return df
 
 
-# @st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
+@st.experimental_memo(ttl=3600 * 24, suppress_st_warning=True)
 def load_by_marketplace_id(data_file):
     # data = Path("data/ml")
     # data_file = list(data.glob(f"{marketplace_id}*"))[0]
